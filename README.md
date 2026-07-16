@@ -26,8 +26,10 @@ the line is a gradient blending the start colour into the end colour. The handle
 are keyboard-friendly too: focus one and use **← / →** (hold **Shift** for 5-minute
 jumps, **Home/End** for the extremes).
 
-Hit **Record it** and the timeline collapses into a recorded summary with on-time
-badges; **Edit** or **Remove** brings it back.
+Hit **Record it** and the timeline stays put as the record itself — the cream
+track lane and drag hint drop away, leaving just the coloured line and its
+handles, plus a one-line verdict. **Edit** makes it draggable again; **Remove**
+clears the week.
 
 ---
 

@@ -205,7 +205,8 @@
     if (link) link.onclick = function () { openSettings(); };
   }
 
-  // -- Hero: date navigator + input / recorded state --
+  // -- Hero: the timeline is always shown; "editing" vs "recorded" only
+  //    changes how it looks and whether the handles respond. --
   function renderHero() {
     if (!state.selected) state.selected = mostRecentSunday();
     var sel = state.selected;
@@ -217,29 +218,39 @@
     $("weekEyebrow").textContent = sel === today ? "This Sunday" : "Sunday";
     $("nextWeek").disabled = isSameOrAfter(sel, today);
 
-    var showInput = state.heroMode === "edit" || (state.heroMode === "auto" && !rec);
-    $("heroInput").hidden = !showInput;
-    $("heroRecorded").hidden = showInput;
+    var editing = state.heroMode === "edit" || (state.heroMode === "auto" && !rec);
+    state.editing = editing;
 
-    if (showInput) {
-      setSlider(rec ? rec.start : cfg.startTarget, rec ? rec.end : cfg.endTarget);
+    // the slider always reflects the current record (or the targets when new)
+    setSlider(rec ? rec.start : cfg.startTarget, rec ? rec.end : cfg.endTarget);
+    setHandlesInteractive(editing);
+    $("heroInput").classList.toggle("recorded", !editing);
+
+    // editable controls
+    $("notes").hidden = !editing;
+    $("saveBtn").hidden = !editing;
+    $("cancelEditBtn").hidden = !(editing && rec); // cancel only when editing an existing record
+    // recorded controls
+    $("editBtn").hidden = editing;
+    $("clearBtn").hidden = editing;
+
+    if (editing) {
       $("notes").value = rec ? (rec.notes || "") : "";
-      $("cancelEditBtn").hidden = !rec; // only offer cancel when editing an existing record
       $("saveBtn").textContent = rec ? "Update" : "Record it";
+      $("recVerdict").hidden = true;
+      $("recNotes").hidden = true;
     } else {
-      var a = analyze(rec);
-      $("recStart").textContent = fmt12(rec.start);
-      $("recEnd").textContent = fmt12(rec.end);
-      badge($("recStartBadge"), a.startOnTime);
-      badge($("recEndBadge"), a.endOnTime);
-      $("recVerdict").textContent = verdict(a);
-      var nt = $("recNotes");
-      if (rec.notes) { nt.hidden = false; nt.textContent = "“" + rec.notes + "”"; } else { nt.hidden = true; }
+      $("recVerdict").hidden = false;
+      $("recVerdict").textContent = verdict(analyze(rec));
+      if (rec.notes) { $("recNotes").hidden = false; $("recNotes").textContent = "“" + rec.notes + "”"; }
+      else { $("recNotes").hidden = true; }
     }
   }
-  function badge(el, onTime) {
-    el.className = "badge " + (onTime ? "ok" : "late");
-    el.textContent = onTime ? "✓" : "!";
+  function setHandlesInteractive(on) {
+    [$("tlStart"), $("tlEnd")].forEach(function (h) {
+      h.tabIndex = on ? 0 : -1;
+      h.setAttribute("aria-readonly", on ? "false" : "true");
+    });
   }
   var WINS = ["Right on time.", "On the dot.", "Perfect week.", "Nailed it.", "Textbook."];
   function verdict(a) {
@@ -406,6 +417,7 @@
     return Math.round(AXIS_START + ((clientX - rect.left) / rect.width) * AXIS_SPAN);
   }
   function onTimelinePointerDown(ev) {
+    if (!state.editing) return;
     var m = minFromClientX(ev.clientX); if (m == null) return;
     var which;
     if (ev.target === $("tlStart") || $("tlStart").contains(ev.target)) which = "start";
@@ -417,7 +429,7 @@
     ev.preventDefault();
   }
   function onTimelineKey(which, ev) {
-    if (!state.slider) return;
+    if (!state.slider || !state.editing) return;
     var cur = which === "start" ? state.slider.start : state.slider.end;
     var big = ev.shiftKey ? 5 : 1;
     switch (ev.key) {

@@ -201,18 +201,11 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .btn.ghost.danger:hover { border-color: var(--late); color: var(--late); }
 .btn.small { padding: 8px 14px; font-size: .84rem; }
 
-/* recorded view */
-.recorded-times { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.rt {
-  display: flex; align-items: center; gap: 10px; padding: 14px 15px; border-radius: var(--radius-sm);
-  background: var(--tint); border: 1px solid var(--tint-line);
-}
-.rt-cap { display: block; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
-.rt-time { display: block; font-size: 1.2rem; font-weight: 800; }
-.badge { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: .9rem; font-weight: 900; color: #fff; }
-.badge.ok { background: var(--ok); }
-.badge.late { background: var(--late); }
-.recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; margin-top: 16px; }
+/* recorded state: the timeline stays, but reads as a record, not a control */
+.recorded .tl-track { background: transparent; border-color: transparent; pointer-events: none; }
+.recorded .tl-handle { cursor: default; box-shadow: 0 2px 5px rgba(43,51,61,.16); }
+.recorded .tl-help { display: none; }
+.recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; margin-top: 18px; }
 .recorded-notes { text-align: center; color: var(--ink-soft); font-weight: 600; margin-top: 4px; font-style: italic; }
 
 /* STATS */

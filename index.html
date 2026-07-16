@@ -32,7 +32,8 @@
         <button id="nextWeek" class="nav-arrow" type="button" aria-label="Next Sunday">›</button>
       </div>
 
-      <!-- input view: drag-the-meeting timeline -->
+      <!-- the meeting timeline is always shown; a "recorded" class flips it
+           from an editable slider to a read-only record display -->
       <form id="heroInput" novalidate>
         <div class="timeline">
           <div class="tl-track" id="tlTrack">
@@ -59,32 +60,17 @@
         <input type="hidden" id="start" />
         <input type="hidden" id="end" />
 
+        <p class="recorded-verdict" id="recVerdict" hidden></p>
+        <p class="recorded-notes" id="recNotes" hidden></p>
+
         <input type="text" id="notes" class="notes-input" placeholder="Add a note (optional)" maxlength="140" />
         <div class="hero-actions">
           <button type="submit" class="btn primary big" id="saveBtn">Record it</button>
           <button type="button" class="btn ghost" id="cancelEditBtn" hidden>Cancel</button>
+          <button type="button" class="btn ghost big" id="editBtn" hidden>Edit</button>
+          <button type="button" class="btn ghost danger" id="clearBtn" hidden>Remove</button>
         </div>
       </form>
-
-      <!-- recorded view -->
-      <div id="heroRecorded" hidden>
-        <div class="recorded-times">
-          <div class="rt">
-            <div><span class="rt-cap">Started</span><span class="rt-time" id="recStart">—</span></div>
-            <span class="badge" id="recStartBadge"></span>
-          </div>
-          <div class="rt">
-            <div><span class="rt-cap">Ended</span><span class="rt-time" id="recEnd">—</span></div>
-            <span class="badge" id="recEndBadge"></span>
-          </div>
-        </div>
-        <p class="recorded-verdict" id="recVerdict"></p>
-        <p class="recorded-notes" id="recNotes" hidden></p>
-        <div class="hero-actions">
-          <button type="button" class="btn ghost" id="editBtn">Edit</button>
-          <button type="button" class="btn ghost danger" id="clearBtn">Remove</button>
-        </div>
-      </div>
     </section>
 
     <!-- STATS -->
