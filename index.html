@@ -32,20 +32,40 @@
         <button id="nextWeek" class="nav-arrow" type="button" aria-label="Next Sunday">›</button>
       </div>
 
-      <!-- input view -->
+      <!-- input view: drag-the-meeting timeline -->
       <form id="heroInput" novalidate>
-        <div class="time-inputs">
-          <label class="time-field">
+        <div class="tl-readout">
+          <div class="tl-read">
             <span class="tf-label">Started</span>
-            <input type="time" id="start" required />
+            <span class="tl-value" id="startValue">—</span>
             <span class="hint" id="startHint"></span>
-          </label>
-          <label class="time-field">
+          </div>
+          <div class="tl-read end">
             <span class="tf-label">Ended</span>
-            <input type="time" id="end" required />
+            <span class="tl-value" id="endValue">—</span>
             <span class="hint" id="endHint"></span>
-          </label>
+          </div>
         </div>
+
+        <div class="timeline">
+          <div class="tl-track" id="tlTrack">
+            <span class="tl-tick" style="left:25%"><i>1:30</i></span>
+            <span class="tl-tick" style="left:75%"><i>2:30</i></span>
+            <div class="tl-fill" id="tlFill"></div>
+            <button type="button" class="tl-handle" id="tlStart" role="slider" tabindex="0"
+                    aria-label="Meeting start time" aria-valuetext=""><span class="tl-grip"></span></button>
+            <button type="button" class="tl-handle" id="tlEnd" role="slider" tabindex="0"
+                    aria-label="Meeting end time" aria-valuetext=""><span class="tl-grip"></span></button>
+          </div>
+          <div class="tl-axis">
+            <span>1:00</span><span>1:30</span><span>2:00</span><span>2:30</span><span>3:00</span>
+          </div>
+          <p class="tl-help">Drag the handles &middot; goal marks at 1:30 &amp; 2:30</p>
+        </div>
+
+        <input type="hidden" id="start" />
+        <input type="hidden" id="end" />
+
         <input type="text" id="notes" class="notes-input" placeholder="Add a note (optional)" maxlength="140" />
         <div class="hero-actions">
           <button type="submit" class="btn primary big" id="saveBtn">Record it</button>

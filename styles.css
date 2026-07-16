@@ -128,20 +128,45 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .week-date { display: block; font-size: 1.28rem; font-weight: 800; }
 .week-eyebrow { display: block; font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--brand); margin-top: 2px; }
 
-.time-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.time-field {
-  display: grid; justify-items: center; gap: 5px; padding: 15px 10px 12px;
-  border-radius: var(--radius-sm); background: var(--bg1); border: 1px solid var(--line);
-}
+/* readout above the timeline */
 .tf-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); }
-.time-field input[type="time"] {
-  font: inherit; font-size: 1.3rem; font-weight: 800; text-align: center; color: var(--ink);
-  background: transparent; border: 0; width: 100%; padding: 2px 0;
-}
-.time-field input[type="time"]:focus { outline: none; }
+.tl-readout { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tl-read { display: grid; justify-items: start; gap: 2px; padding: 14px 16px; border-radius: var(--radius-sm); background: var(--bg1); border: 1px solid var(--line); }
+.tl-read.end { justify-items: end; text-align: right; }
+.tl-value { font-size: 1.42rem; font-weight: 900; color: var(--ok); line-height: 1.1; }
+.tl-value.late { color: var(--late); }
 .hint { font-size: .76rem; font-weight: 800; min-height: 1.1em; }
 .hint.ok { color: var(--ok); }
 .hint.late { color: var(--late); }
+
+/* the timeline slider */
+.timeline { margin-top: 20px; padding: 0 13px; }
+.tl-track {
+  position: relative; height: 10px; border-radius: 999px; background: var(--line-soft);
+  border: 1px solid var(--line); touch-action: none;
+}
+.tl-fill {
+  position: absolute; top: -1px; bottom: -1px; left: 25%; width: 50%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--ok), color-mix(in srgb, var(--ok) 65%, var(--brand)));
+}
+.tl-fill.late { background: linear-gradient(90deg, var(--partial), var(--late)); }
+.tl-tick { position: absolute; top: 50%; width: 0; height: 24px; transform: translate(-50%, -50%); border-left: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent); }
+.tl-tick i { position: absolute; top: -19px; left: 50%; transform: translateX(-50%); font-size: .62rem; font-weight: 800; font-style: normal; color: var(--accent); white-space: nowrap; }
+.tl-handle {
+  position: absolute; top: 50%; left: 25%; width: 30px; height: 30px; transform: translate(-50%, -50%);
+  border-radius: 50%; background: var(--card); border: 3px solid var(--brand); cursor: grab;
+  padding: 0; touch-action: none; box-shadow: 0 2px 6px rgba(43,51,61,.18); transition: border-color .15s, box-shadow .15s;
+  display: grid; place-items: center; z-index: 2;
+}
+.tl-handle.late { border-color: var(--late); }
+.tl-handle:hover { box-shadow: 0 3px 10px rgba(43,51,61,.26); }
+.tl-handle:active { cursor: grabbing; }
+.tl-handle:focus-visible { outline: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 30%, transparent); }
+.tl-handle.late:focus-visible { box-shadow: 0 0 0 4px color-mix(in srgb, var(--late) 30%, transparent); }
+.tl-grip { width: 9px; height: 9px; border-radius: 50%; background: var(--brand); }
+.tl-handle.late .tl-grip { background: var(--late); }
+.tl-axis { display: flex; justify-content: space-between; margin-top: 12px; font-size: .68rem; font-weight: 800; color: var(--muted); }
+.tl-help { text-align: center; font-size: .72rem; color: var(--muted); font-weight: 700; margin-top: 8px; }
 
 .notes-input {
   font: inherit; font-weight: 600; color: var(--ink); background: var(--bg1);

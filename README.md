@@ -16,9 +16,16 @@ Until you connect a sheet, the app works right away by saving to your browser
 
 The entry card sits at the top. Use the **‹ ›** arrows to move between Sundays
 (no calendar to fuss with) — back for previous weeks, forward to return toward
-this Sunday. Enter the start and end time and hit **Record it.** The inputs then
-collapse into a recorded summary with on-time badges; **Edit** or **Remove**
-brings them back.
+this Sunday.
+
+Set the times on the **meeting timeline** — a line running 1:00 → 3:00 PM with
+dashed goal marks at 1:30 and 2:30. Drag the two handles (start and end) in
+one-minute steps; the readouts turn red the moment either runs late. The handles
+are keyboard-friendly too: focus one and use **← / →** (hold **Shift** for 5-minute
+jumps, **Home/End** for the extremes).
+
+Hit **Record it** and the timeline collapses into a recorded summary with on-time
+badges; **Edit** or **Remove** brings it back.
 
 ---
 

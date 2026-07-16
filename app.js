@@ -34,7 +34,7 @@
   }
 
   var cfg = loadConfig();
-  var state = { records: [], loading: false, selected: null, heroMode: "auto" };
+  var state = { records: [], loading: false, selected: null, heroMode: "auto", slider: null, dragging: null };
 
   // ---- Time helpers ---------------------------------------------------------
   function toMin(hhmm) {
@@ -45,6 +45,17 @@
   }
   var START_TARGET = toMin(cfg.startTarget);
   var END_TARGET = toMin(cfg.endTarget);
+
+  // Timeline axis: one hour of slack around each target (1:00 PM … 3:00 PM),
+  // so a late start or a long meeting still fits on the line.
+  var AXIS_START = Math.min(START_TARGET, END_TARGET) - 30; // 13:00
+  var AXIS_END = Math.max(START_TARGET, END_TARGET) + 30;   // 15:00
+  var AXIS_SPAN = AXIS_END - AXIS_START;
+  var MIN_GAP = 1; // start must be at least a minute before end
+
+  function minToHHMM(m) { m = Math.round(m); return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function pctOf(min) { return clamp(((min - AXIS_START) / AXIS_SPAN) * 100, 0, 100); }
 
   function fmt12(hhmm) {
     var mins = toMin(hhmm);
@@ -211,12 +222,10 @@
     $("heroRecorded").hidden = showInput;
 
     if (showInput) {
-      $("start").value = rec ? rec.start : cfg.startTarget;
-      $("end").value = rec ? rec.end : cfg.endTarget;
+      setSlider(rec ? rec.start : cfg.startTarget, rec ? rec.end : cfg.endTarget);
       $("notes").value = rec ? (rec.notes || "") : "";
       $("cancelEditBtn").hidden = !rec; // only offer cancel when editing an existing record
       $("saveBtn").textContent = rec ? "Update" : "Record it";
-      updateHints();
     } else {
       var a = analyze(rec);
       $("recStart").textContent = fmt12(rec.start);
@@ -335,6 +344,86 @@
   function goToWeek(date) { state.selected = date; state.heroMode = "auto"; renderHero(); }
   function scrollToHero() { document.querySelector(".hero").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
+  // ---- Timeline slider ------------------------------------------------------
+  function setSlider(startHHMM, endHHMM) {
+    var s = clamp(toMin(startHHMM) != null ? toMin(startHHMM) : START_TARGET, AXIS_START, AXIS_END);
+    var e = clamp(toMin(endHHMM) != null ? toMin(endHHMM) : END_TARGET, AXIS_START, AXIS_END);
+    if (e < s + MIN_GAP) e = Math.min(AXIS_END, s + MIN_GAP);
+    state.slider = { start: s, end: e };
+    renderTimeline();
+  }
+  function setHandle(which, m) {
+    if (!state.slider) return;
+    if (which === "start") state.slider.start = clamp(m, AXIS_START, state.slider.end - MIN_GAP);
+    else state.slider.end = clamp(m, state.slider.start + MIN_GAP, AXIS_END);
+    renderTimeline();
+  }
+  function renderTimeline() {
+    var sl = state.slider; if (!sl) return;
+    var sHHMM = minToHHMM(sl.start), eHHMM = minToHHMM(sl.end);
+    var a = analyze({ start: sHHMM, end: eHHMM });
+    var sp = pctOf(sl.start), ep = pctOf(sl.end);
+
+    $("tlStart").style.left = sp + "%";
+    $("tlEnd").style.left = ep + "%";
+    $("tlFill").style.left = sp + "%";
+    $("tlFill").style.width = (ep - sp) + "%";
+    $("tlFill").classList.toggle("late", !a.success);
+    $("tlStart").classList.toggle("late", !a.startOnTime);
+    $("tlEnd").classList.toggle("late", !a.endOnTime);
+
+    $("startValue").textContent = fmt12(sHHMM);
+    $("endValue").textContent = fmt12(eHHMM);
+    $("startValue").classList.toggle("late", !a.startOnTime);
+    $("endValue").classList.toggle("late", !a.endOnTime);
+
+    setSliderAria($("tlStart"), sl.start, "start");
+    setSliderAria($("tlEnd"), sl.end, "end");
+
+    // keep the hidden inputs (read by save/validation) in sync
+    $("start").value = sHHMM;
+    $("end").value = eHHMM;
+    updateHints();
+  }
+  function setSliderAria(el, min, which) {
+    el.setAttribute("aria-valuemin", which === "start" ? AXIS_START : AXIS_START + MIN_GAP);
+    el.setAttribute("aria-valuemax", which === "start" ? AXIS_END - MIN_GAP : AXIS_END);
+    el.setAttribute("aria-valuenow", String(min));
+    el.setAttribute("aria-valuetext", fmt12(minToHHMM(min)) + (
+      which === "start" ? (min <= START_TARGET ? " (on time)" : " (late)") : (min <= END_TARGET ? " (on time)" : " (late)")));
+  }
+  function minFromClientX(clientX) {
+    var rect = $("tlTrack").getBoundingClientRect();
+    if (!rect.width) return null;
+    return Math.round(AXIS_START + ((clientX - rect.left) / rect.width) * AXIS_SPAN);
+  }
+  function onTimelinePointerDown(ev) {
+    var m = minFromClientX(ev.clientX); if (m == null) return;
+    var which;
+    if (ev.target === $("tlStart") || $("tlStart").contains(ev.target)) which = "start";
+    else if (ev.target === $("tlEnd") || $("tlEnd").contains(ev.target)) which = "end";
+    else which = Math.abs(m - state.slider.start) <= Math.abs(m - state.slider.end) ? "start" : "end";
+    state.dragging = which;
+    (which === "start" ? $("tlStart") : $("tlEnd")).focus();
+    setHandle(which, m);
+    ev.preventDefault();
+  }
+  function onTimelineKey(which, ev) {
+    if (!state.slider) return;
+    var cur = which === "start" ? state.slider.start : state.slider.end;
+    var big = ev.shiftKey ? 5 : 1;
+    switch (ev.key) {
+      case "ArrowLeft": case "ArrowDown": setHandle(which, cur - big); break;
+      case "ArrowRight": case "ArrowUp": setHandle(which, cur + big); break;
+      case "PageDown": setHandle(which, cur - 5); break;
+      case "PageUp": setHandle(which, cur + 5); break;
+      case "Home": setHandle(which, which === "start" ? AXIS_START : state.slider.start + MIN_GAP); break;
+      case "End": setHandle(which, which === "start" ? state.slider.end - MIN_GAP : AXIS_END); break;
+      default: return;
+    }
+    ev.preventDefault();
+  }
+
   function updateHints() {
     setHint("startHint", toMin($("start").value), START_TARGET);
     setHint("endHint", toMin($("end").value), END_TARGET);
@@ -409,8 +498,11 @@
   function init() {
     state.selected = mostRecentSunday();
     $("heroInput").addEventListener("submit", onSubmit);
-    $("start").addEventListener("input", updateHints);
-    $("end").addEventListener("input", updateHints);
+    $("tlTrack").addEventListener("pointerdown", onTimelinePointerDown);
+    document.addEventListener("pointermove", function (e) { if (state.dragging) { var m = minFromClientX(e.clientX); if (m != null) setHandle(state.dragging, m); } });
+    document.addEventListener("pointerup", function () { state.dragging = null; });
+    $("tlStart").addEventListener("keydown", function (e) { onTimelineKey("start", e); });
+    $("tlEnd").addEventListener("keydown", function (e) { onTimelineKey("end", e); });
     $("prevWeek").addEventListener("click", function () { goToWeek(addDays(state.selected, -7)); });
     $("nextWeek").addEventListener("click", function () {
       var next = addDays(state.selected, 7);
