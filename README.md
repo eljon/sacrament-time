@@ -12,6 +12,14 @@ streak, success rate, and how close you are to your goal.
 Until you connect a sheet, the app works right away by saving to your browser
 (`localStorage`), so you can try it before wiring anything up.
 
+## Using it
+
+The entry card sits at the top. Use the **‹ ›** arrows to move between Sundays
+(no calendar to fuss with) — back for previous weeks, forward to return toward
+this Sunday. Enter the start and end time and hit **Record it!** The inputs then
+collapse into a recorded summary with on-time stickers; **Edit** or **Remove**
+brings them back. Log an on-time week and you get a little confetti. 🎉
+
 ---
 
 ## What it tracks
