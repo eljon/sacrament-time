@@ -34,28 +34,21 @@
 
       <!-- input view: drag-the-meeting timeline -->
       <form id="heroInput" novalidate>
-        <div class="tl-readout">
-          <div class="tl-read">
-            <span class="tf-label">Started</span>
-            <span class="tl-value" id="startValue">—</span>
-            <span class="hint" id="startHint"></span>
-          </div>
-          <div class="tl-read end">
-            <span class="tf-label">Ended</span>
-            <span class="tl-value" id="endValue">—</span>
-            <span class="hint" id="endHint"></span>
-          </div>
-        </div>
-
         <div class="timeline">
           <div class="tl-track" id="tlTrack">
-            <span class="tl-tick" style="left:25%"><i>1:30</i></span>
-            <span class="tl-tick" style="left:75%"><i>2:30</i></span>
+            <span class="tl-tick" style="left:25%"></span>
+            <span class="tl-tick" style="left:75%"></span>
             <div class="tl-fill" id="tlFill"></div>
             <button type="button" class="tl-handle" id="tlStart" role="slider" tabindex="0"
-                    aria-label="Meeting start time" aria-valuetext=""><span class="tl-grip"></span></button>
+                    aria-label="Meeting start time" aria-valuetext="">
+              <span class="tl-flag"><span class="tl-cap">START</span><span class="tl-time" id="startValue">—</span></span>
+              <span class="tl-grip"></span>
+            </button>
             <button type="button" class="tl-handle" id="tlEnd" role="slider" tabindex="0"
-                    aria-label="Meeting end time" aria-valuetext=""><span class="tl-grip"></span></button>
+                    aria-label="Meeting end time" aria-valuetext="">
+              <span class="tl-flag"><span class="tl-cap">END</span><span class="tl-time" id="endValue">—</span></span>
+              <span class="tl-grip"></span>
+            </button>
           </div>
           <div class="tl-axis">
             <span>1:00</span><span>1:30</span><span>2:00</span><span>2:30</span><span>3:00</span>

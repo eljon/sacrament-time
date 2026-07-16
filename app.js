@@ -383,7 +383,6 @@
     // keep the hidden inputs (read by save/validation) in sync
     $("start").value = sHHMM;
     $("end").value = eHHMM;
-    updateHints();
   }
   function setSliderAria(el, min, which) {
     el.setAttribute("aria-valuemin", which === "start" ? AXIS_START : AXIS_START + MIN_GAP);
@@ -422,18 +421,6 @@
       default: return;
     }
     ev.preventDefault();
-  }
-
-  function updateHints() {
-    setHint("startHint", toMin($("start").value), START_TARGET);
-    setHint("endHint", toMin($("end").value), END_TARGET);
-  }
-  function setHint(id, mins, target) {
-    var el = $(id);
-    if (mins == null) { el.textContent = ""; el.className = "hint"; return; }
-    var dev = mins - target;
-    el.textContent = dev <= 0 ? "✓ " + deltaLabel(dev) : "✕ " + deltaLabel(dev);
-    el.className = "hint " + (dev <= 0 ? "ok" : "late");
   }
 
   function onSubmit(ev) {
