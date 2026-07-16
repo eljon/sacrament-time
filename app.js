@@ -364,6 +364,12 @@
     if (dev <= 7) return "var(--c-orange)";
     return "var(--c-red)";
   }
+  // rotate a handle's clock hands to the time it represents
+  function setClock(el, minutes) {
+    var hh = Math.floor(minutes / 60), mm = minutes % 60;
+    el.style.setProperty("--m", (mm * 6) + "deg");            // 6° per minute
+    el.style.setProperty("--h", (((hh % 12) + mm / 60) * 30) + "deg"); // 30° per hour
+  }
   function setSlider(startHHMM, endHHMM) {
     var s = clamp(toMin(startHHMM) != null ? toMin(startHHMM) : START_TARGET, AXIS_START, AXIS_END);
     var e = clamp(toMin(endHHMM) != null ? toMin(endHHMM) : END_TARGET, AXIS_START, AXIS_END);
@@ -393,6 +399,8 @@
     $("tlFill").style.background = "linear-gradient(90deg, " + cs + ", " + ce + ")";
     $("tlStart").style.setProperty("--hc", cs);
     $("tlEnd").style.setProperty("--hc", ce);
+    setClock($("tlStart"), sl.start);
+    setClock($("tlEnd"), sl.end);
 
     $("startValue").textContent = fmt12(sHHMM);
     $("endValue").textContent = fmt12(eHHMM);
