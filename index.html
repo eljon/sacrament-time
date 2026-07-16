@@ -4,35 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sacrament Time Tracker</title>
-  <meta name="description" content="Did sacrament meeting start at 1:30 and end at 2:30? Track streaks, success rate, and goal progress — the fun way." />
+  <meta name="description" content="Did sacrament meeting start at 1:30 and end at 2:30? Track streaks, success rate, and goal progress." />
   <link rel="preconnect" href="https://script.google.com" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏰</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏱️</text></svg>" />
 </head>
 <body>
-  <div class="blobs" aria-hidden="true"><span></span><span></span><span></span></div>
+  <button id="settingsBtn" class="icon-btn" type="button" title="Settings" aria-label="Settings">⚙</button>
 
   <header class="site-header wrap">
-    <div class="brand">
-      <span class="brand-mark" aria-hidden="true">⏰</span>
-      <div>
-        <h1>Sacrament <span>Time</span> Tracker</h1>
-        <p class="tagline">start by <b>1:30</b> · end by <b>2:30</b></p>
-      </div>
-    </div>
-    <button id="settingsBtn" class="icon-btn" type="button" title="Settings" aria-label="Settings">⚙️</button>
+    <span class="eyebrow">SACRAMENT MEETING</span>
+    <h1>Time Tracker</h1>
+    <p class="tagline">start by <b>1:30</b> &middot; end by <b>2:30</b></p>
   </header>
 
   <div id="banner" class="banner wrap" hidden></div>
 
   <main class="wrap">
-    <!-- HERO: this week's entry, at the top -->
-    <section class="hero" aria-label="Log this week">
+    <!-- HERO: this week's entry -->
+    <section class="card hero" aria-label="Log this week">
       <div class="week-nav">
         <button id="prevWeek" class="nav-arrow" type="button" aria-label="Previous Sunday">‹</button>
         <div class="week-label">
-          <span class="week-eyebrow" id="weekEyebrow">Sunday</span>
           <span class="week-date" id="weekDate">—</span>
+          <span class="week-eyebrow" id="weekEyebrow">Sunday</span>
         </div>
         <button id="nextWeek" class="nav-arrow" type="button" aria-label="Next Sunday">›</button>
       </div>
@@ -40,83 +35,81 @@
       <!-- input view -->
       <form id="heroInput" novalidate>
         <div class="time-inputs">
-          <label class="time-field start">
-            <span class="tf-emoji">🚪</span>
+          <label class="time-field">
             <span class="tf-label">Started</span>
             <input type="time" id="start" required />
             <span class="hint" id="startHint"></span>
           </label>
-          <label class="time-field end">
-            <span class="tf-emoji">🏁</span>
+          <label class="time-field">
             <span class="tf-label">Ended</span>
             <input type="time" id="end" required />
             <span class="hint" id="endHint"></span>
           </label>
         </div>
-        <input type="text" id="notes" class="notes-input" placeholder="✏️ add a note… (optional)" maxlength="140" />
+        <input type="text" id="notes" class="notes-input" placeholder="Add a note (optional)" maxlength="140" />
         <div class="hero-actions">
-          <button type="submit" class="btn primary big" id="saveBtn">Record it! 🎯</button>
+          <button type="submit" class="btn primary big" id="saveBtn">Record it</button>
           <button type="button" class="btn ghost" id="cancelEditBtn" hidden>Cancel</button>
         </div>
       </form>
 
-      <!-- recorded view (fields collapse into this once logged) -->
+      <!-- recorded view -->
       <div id="heroRecorded" hidden>
         <div class="recorded-times">
           <div class="rt">
-            <span class="rt-emoji">🚪</span>
             <div><span class="rt-cap">Started</span><span class="rt-time" id="recStart">—</span></div>
-            <span class="sticker" id="recStartBadge"></span>
+            <span class="badge" id="recStartBadge"></span>
           </div>
           <div class="rt">
-            <span class="rt-emoji">🏁</span>
             <div><span class="rt-cap">Ended</span><span class="rt-time" id="recEnd">—</span></div>
-            <span class="sticker" id="recEndBadge"></span>
+            <span class="badge" id="recEndBadge"></span>
           </div>
         </div>
         <p class="recorded-verdict" id="recVerdict"></p>
         <p class="recorded-notes" id="recNotes" hidden></p>
         <div class="hero-actions">
-          <button type="button" class="btn ghost" id="editBtn">✏️ Edit</button>
-          <button type="button" class="btn ghost danger" id="clearBtn">🗑️ Remove</button>
+          <button type="button" class="btn ghost" id="editBtn">Edit</button>
+          <button type="button" class="btn ghost danger" id="clearBtn">Remove</button>
         </div>
       </div>
     </section>
 
     <!-- STATS -->
     <section class="stats" aria-label="Statistics">
-      <div class="stat-card s1">
-        <div class="stat-value"><span id="statStreak">0</span> <span class="stat-icon">🔥</span></div>
+      <div class="stat-card">
+        <div class="stat-value" id="statStreak">0</div>
         <div class="stat-label">Current streak</div>
         <div class="stat-sub" id="statStreakSub">weeks on time</div>
       </div>
-      <div class="stat-card s2">
-        <div class="stat-value"><span id="statLongest">0</span> <span class="stat-icon">🏆</span></div>
+      <div class="stat-card">
+        <div class="stat-value" id="statLongest">0</div>
         <div class="stat-label">Longest streak</div>
         <div class="stat-sub">personal best</div>
       </div>
-      <div class="stat-card s3">
+      <div class="stat-card">
         <div class="stat-value" id="statRate">—</div>
         <div class="stat-label">Success rate</div>
         <div class="stat-sub" id="statRateSub">start &amp; end on time</div>
       </div>
-      <div class="stat-card s4">
+      <div class="stat-card">
         <div class="stat-value" id="statWeeks">0</div>
         <div class="stat-label">Weeks tracked</div>
-        <div class="stat-sub" id="statSince">let's go!</div>
+        <div class="stat-sub" id="statSince">—</div>
       </div>
     </section>
 
     <!-- GOAL -->
     <section class="card goal-card" aria-label="Goal">
-      <div class="goal-head">
-        <h2>🎯 Goal</h2>
-        <span class="goal-target" id="goalTarget"></span>
+      <div class="goal-top">
+        <div class="ring" id="goalRing"><div class="ring-hole"><b id="ringPct">0%</b></div></div>
+        <div class="goal-body">
+          <div class="goal-head">
+            <h2>Goal</h2>
+            <span class="goal-target" id="goalTarget"></span>
+          </div>
+          <p class="goal-msg" id="goalMsg">Log your first week to get started.</p>
+        </div>
       </div>
-      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="goalBarWrap">
-        <div class="progress-fill" id="goalBar"><span class="runner" id="goalRunner">🚀</span></div>
-      </div>
-      <p class="goal-msg" id="goalMsg">Log your first week to get started! 👇</p>
       <div class="insight-grid" id="insightGrid" hidden>
         <div class="insight"><span class="insight-label">Typical start</span><span class="insight-value" id="insStart">—</span></div>
         <div class="insight"><span class="insight-label">Typical end</span><span class="insight-value" id="insEnd">—</span></div>
@@ -127,7 +120,7 @@
 
     <!-- RECENT STRIP -->
     <section class="card" aria-label="Recent weeks" id="stripCard" hidden>
-      <h2 class="strip-title">📅 Last weeks</h2>
+      <div class="section-head"><h2>Last weeks</h2></div>
       <div class="strip" id="strip"></div>
       <div class="legend">
         <span><i class="dot ok"></i> On time</span>
@@ -138,22 +131,22 @@
 
     <!-- HISTORY -->
     <section class="card" aria-label="History">
-      <div class="history-head">
-        <h2>📖 History</h2>
-        <button type="button" class="btn ghost small" id="refreshBtn">↻ Refresh</button>
+      <div class="section-head">
+        <h2>History</h2>
+        <button type="button" class="btn ghost small" id="refreshBtn">Refresh</button>
       </div>
       <div id="history"></div>
     </section>
   </main>
 
   <footer class="site-footer wrap">
-    <p>Data lives in your Google Sheet. No accounts, no servers. ✨</p>
+    <p>Data lives in your Google Sheet. No accounts, no servers.</p>
   </footer>
 
   <!-- Settings dialog -->
   <dialog id="settingsDialog" class="dialog">
     <form method="dialog" class="dialog-inner">
-      <h2>⚙️ Settings</h2>
+      <h2>Settings</h2>
       <p class="muted small">Paste the Web App URL from your Google Apps Script deployment. Leave blank to store data only in this browser.</p>
       <div class="field">
         <label for="cfgUrl">Apps Script Web App URL</label>
@@ -177,7 +170,6 @@
     </form>
   </dialog>
 
-  <div id="confetti" class="confetti" aria-hidden="true"></div>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="config.js"></script>

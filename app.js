@@ -188,8 +188,8 @@
     var b = $("banner");
     if (usingRemote()) { b.hidden = true; return; }
     b.hidden = false;
-    b.innerHTML = "💾 Saving to this browser only. Connect a Google Sheet in " +
-      '<a id="bannerSettings">Settings ⚙️</a> to sync everywhere.';
+    b.innerHTML = "Saving to this browser only. Connect a Google Sheet in " +
+      '<a id="bannerSettings">Settings</a> to sync everywhere.';
     var link = $("bannerSettings");
     if (link) link.onclick = function () { openSettings(); };
   }
@@ -215,7 +215,7 @@
       $("end").value = rec ? rec.end : cfg.endTarget;
       $("notes").value = rec ? (rec.notes || "") : "";
       $("cancelEditBtn").hidden = !rec; // only offer cancel when editing an existing record
-      $("saveBtn").textContent = rec ? "Update it! 🎯" : "Record it! 🎯";
+      $("saveBtn").textContent = rec ? "Update" : "Record it";
       updateHints();
     } else {
       var a = analyze(rec);
@@ -229,15 +229,15 @@
     }
   }
   function badge(el, onTime) {
-    el.className = "sticker " + (onTime ? "ok" : "late");
-    el.textContent = onTime ? "✅" : "⏰";
+    el.className = "badge " + (onTime ? "ok" : "late");
+    el.textContent = onTime ? "✓" : "!";
   }
-  var WINS = ["Nailed it! 🎉", "Right on time! ⭐", "Perfect week! 🙌", "On the dot! 🎯", "Textbook. 👏"];
+  var WINS = ["Right on time.", "On the dot.", "Perfect week.", "Nailed it.", "Textbook."];
   function verdict(a) {
     if (a.success) return WINS[(a.startMin + a.endMin) % WINS.length];
-    if (!a.startOnTime && !a.endOnTime) return "Late start & long meeting 😅";
-    if (!a.startOnTime) return "Started a bit late ⏰";
-    return "Ran a little long ⏰";
+    if (!a.startOnTime && !a.endOnTime) return "Late start and ran long.";
+    if (!a.startOnTime) return "Started a bit late.";
+    return "Ran a little long.";
   }
 
   function renderStats() {
@@ -248,20 +248,19 @@
     $("statRate").textContent = s.rate == null ? "—" : s.rate + "%";
     $("statRateSub").textContent = s.total ? s.successes + " of " + s.total + " weeks" : "start & end on time";
     $("statWeeks").textContent = s.total;
-    $("statSince").textContent = s.firstDate ? "since " + shortDate(s.firstDate) : "let's go!";
+    $("statSince").textContent = s.firstDate ? "since " + shortDate(s.firstDate) : "let's begin";
   }
 
   function renderGoal() {
     var s = computeStats(), goal = cfg.goal;
     $("goalTarget").textContent = goal + "-week on-time streak";
     var pct = goal ? Math.min(100, Math.round((s.current / goal) * 100)) : 0;
-    $("goalBar").style.width = pct + "%";
-    $("goalRunner").textContent = s.current >= goal ? "🏆" : "🚀";
-    $("goalBarWrap").setAttribute("aria-valuenow", String(pct));
+    $("goalRing").style.setProperty("--deg", (pct * 3.6) + "deg");
+    $("ringPct").textContent = pct + "%";
 
     var msg = $("goalMsg");
-    if (s.total === 0) msg.innerHTML = "Log your first week to get started! 👇";
-    else if (s.current >= goal) msg.innerHTML = "🎉 <strong>Goal smashed!</strong> You're on a " + s.current + "-week on-time streak — keep it rolling!";
+    if (s.total === 0) msg.innerHTML = "Log your first week to get started.";
+    else if (s.current >= goal) msg.innerHTML = "<strong>Goal reached.</strong> You're on a " + s.current + "-week on-time streak — keep it going.";
     else {
       var togo = goal - s.current;
       msg.innerHTML = "<strong>" + togo + " more on-time week" + (togo === 1 ? "" : "s") + "</strong> to hit your goal. " + weakSpot(s);
@@ -276,10 +275,10 @@
     $("insEndLate").textContent = s.endLate + " / " + s.total;
   }
   function weakSpot(s) {
-    if (s.startLate === 0 && s.endLate === 0) return "You're on time — just keep the streak alive! 🔥";
+    if (s.startLate === 0 && s.endLate === 0) return "You're on time — just keep the streak alive.";
     if (s.endLate > s.startLate) return "Running long is the main snag — late finish on " + s.endLate + " of " + s.total + " weeks.";
     if (s.startLate > s.endLate) return "Starting late is the main snag — on " + s.startLate + " of " + s.total + " weeks.";
-    return "Start & finish run late about equally often.";
+    return "Start and finish run late about equally often.";
   }
   function devText(mins) { if (mins == null) return "—"; var r = Math.round(mins); if (r === 0) return "on time"; return (r > 0 ? "+" : "") + r + " min"; }
   function colorFor(mins) { if (mins == null) return ""; return mins > 0.5 ? "var(--late)" : "var(--ok)"; }
@@ -303,9 +302,9 @@
 
   function renderHistory() {
     var host = $("history"); host.innerHTML = "";
-    if (state.loading) { host.innerHTML = '<p class="empty">Loading… ⏳</p>'; return; }
+    if (state.loading) { host.innerHTML = '<p class="empty">Loading…</p>'; return; }
     var recs = sortedRecords().reverse();
-    if (recs.length === 0) { host.innerHTML = '<p class="empty">No weeks logged yet — add your first one up top! ☝️</p>'; return; }
+    if (recs.length === 0) { host.innerHTML = '<p class="empty">No weeks logged yet — add your first one up top.</p>'; return; }
     recs.forEach(function (r) {
       var a = analyze(r);
       var el = document.createElement("div"); el.className = "entry";
@@ -317,8 +316,8 @@
       mid.appendChild(times);
       if (r.notes) { var nt = document.createElement("div"); nt.className = "entry-notes"; nt.textContent = r.notes; mid.appendChild(nt); }
       var actions = document.createElement("div"); actions.className = "entry-actions";
-      actions.appendChild(miniBtn("✏️", "Edit", function () { goToWeek(r.date); state.heroMode = "edit"; renderHero(); scrollToHero(); }));
-      actions.appendChild(miniBtn("🗑️", "Delete", function () { confirmDelete(r); }));
+      actions.appendChild(miniBtn("✎", "Edit", function () { goToWeek(r.date); state.heroMode = "edit"; renderHero(); scrollToHero(); }));
+      actions.appendChild(miniBtn("✕", "Delete", function () { confirmDelete(r); }));
       el.appendChild(d); el.appendChild(mid); el.appendChild(actions);
       host.appendChild(el);
     });
@@ -356,38 +355,20 @@
       date: state.selected,
       start: $("start").value, end: $("end").value, notes: $("notes").value.trim(),
     };
-    if (!rec.date || !rec.start || !rec.end) { toast("Fill in start and end ⏰"); return; }
-    var wasSuccess = analyze(rec).success;
+    if (!rec.date || !rec.start || !rec.end) { toast("Fill in start and end"); return; }
     var btn = $("saveBtn"); btn.disabled = true;
     var op = rec.id ? updateRecord(rec) : addRecord(rec);
     op.then(function () {
       state.heroMode = "auto"; renderAll();
-      toast(existing ? "Week updated ✨" : "Week recorded! ✨");
-      if (wasSuccess) celebrate();
+      toast(existing ? "Week updated" : "Week recorded");
     }).catch(function (err) { toast("Error: " + err.message); })
       .finally(function () { btn.disabled = false; });
   }
 
   function confirmDelete(r) {
     if (!window.confirm("Delete the entry for " + shortDate(r.date) + "?")) return;
-    deleteRecord(r.id).then(function () { state.heroMode = "auto"; renderAll(); toast("Deleted 🗑️"); })
+    deleteRecord(r.id).then(function () { state.heroMode = "auto"; renderAll(); toast("Deleted"); })
       .catch(function (err) { toast("Error: " + err.message); });
-  }
-
-  // ---- Confetti -------------------------------------------------------------
-  function celebrate() {
-    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    var host = $("confetti"); var emojis = ["🎉", "⭐", "✨", "🥳", "⏰", "💜", "🎊"];
-    for (var i = 0; i < 28; i++) {
-      var s = document.createElement("span");
-      s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-      s.style.left = Math.random() * 100 + "vw";
-      s.style.animationDuration = (1.6 + Math.random() * 1.4) + "s";
-      s.style.animationDelay = (Math.random() * 0.3) + "s";
-      s.style.fontSize = (0.9 + Math.random() * 1.1) + "rem";
-      host.appendChild(s);
-      (function (node) { setTimeout(function () { node.remove(); }, 3400); })(s);
-    }
   }
 
   // ---- Settings -------------------------------------------------------------
