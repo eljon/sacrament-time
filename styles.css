@@ -21,6 +21,11 @@
   --late-bg: #f8ece5;
   --late-line: #ecd3c6;
   --partial: #cf8a3c;
+  /* lateness scale for the timeline: on time / <3 min / 3-7 min / beyond */
+  --c-ok: #2f8f6d;
+  --c-yellow: #d4a017;
+  --c-orange: #d97706;
+  --c-red: #c0563f;
   --tint: #eef4f6;        /* recorded / selected tint */
   --tint-line: #d9e6ea;
   --shadow: 0 1px 2px rgba(43, 51, 61, .05), 0 10px 24px rgba(43, 51, 61, .06);
@@ -49,6 +54,10 @@
     --late-bg: #33211a;
     --late-line: #543528;
     --partial: #d99a4f;
+    --c-ok: #56b389;
+    --c-yellow: #e6b53a;
+    --c-orange: #e8893f;
+    --c-red: #db7a5f;
     --tint: #22302f;
     --tint-line: #33474a;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px rgba(0,0,0,.35);
@@ -136,23 +145,20 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 }
 .tl-fill {
   position: absolute; top: -1px; bottom: -1px; left: 25%; width: 50%; border-radius: 999px;
-  background: linear-gradient(90deg, var(--ok), color-mix(in srgb, var(--ok) 65%, var(--brand)));
+  background: var(--c-ok); /* replaced at runtime with a start-to-end gradient */
 }
-.tl-fill.late { background: linear-gradient(90deg, var(--partial), var(--late)); }
 .tl-tick { position: absolute; top: 50%; width: 0; height: 30px; transform: translate(-50%, -50%); border-left: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent); }
 .tl-handle {
+  --hc: var(--brand);
   position: absolute; top: 50%; left: 25%; width: 40px; height: 40px; transform: translate(-50%, -50%);
-  border-radius: 50%; background: var(--card); border: 4px solid var(--brand); cursor: grab;
+  border-radius: 50%; background: var(--card); border: 4px solid var(--hc); cursor: grab;
   padding: 0; touch-action: none; box-shadow: 0 3px 8px rgba(43,51,61,.2); transition: border-color .15s, box-shadow .15s;
   display: grid; place-items: center; z-index: 2;
 }
-.tl-handle.late { border-color: var(--late); }
 .tl-handle:hover { box-shadow: 0 4px 12px rgba(43,51,61,.28); }
 .tl-handle:active { cursor: grabbing; }
-.tl-handle:focus-visible { outline: none; box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand) 28%, transparent); }
-.tl-handle.late:focus-visible { box-shadow: 0 0 0 5px color-mix(in srgb, var(--late) 28%, transparent); }
-.tl-grip { width: 12px; height: 12px; border-radius: 50%; background: var(--brand); }
-.tl-handle.late .tl-grip { background: var(--late); }
+.tl-handle:focus-visible { outline: none; box-shadow: 0 0 0 5px color-mix(in srgb, var(--hc) 28%, transparent); }
+.tl-grip { width: 12px; height: 12px; border-radius: 50%; background: var(--hc); }
 /* the value flag above each handle */
 .tl-flag {
   position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 11px;
@@ -160,8 +166,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   white-space: nowrap; pointer-events: none;
 }
 .tl-cap { font-size: .6rem; font-weight: 800; letter-spacing: .14em; color: var(--ink-soft); }
-.tl-time { font-size: 1.55rem; font-weight: 900; color: var(--ok); }
-.tl-time.late { color: var(--late); }
+.tl-time { font-size: 1.55rem; font-weight: 900; color: var(--hc); }
 .tl-axis { display: flex; justify-content: space-between; margin-top: 14px; font-size: .68rem; font-weight: 800; color: var(--muted); }
 .tl-help { text-align: center; font-size: .72rem; color: var(--muted); font-weight: 700; margin-top: 9px; }
 

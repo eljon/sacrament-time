@@ -345,6 +345,14 @@
   function scrollToHero() { document.querySelector(".hero").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
   // ---- Timeline slider ------------------------------------------------------
+  // Colour for how late an end is: on time → green, <3 min → yellow,
+  // 3-7 min → orange, beyond → red.
+  function lateColor(dev) {
+    if (dev == null || dev <= 0) return "var(--c-ok)";
+    if (dev < 3) return "var(--c-yellow)";
+    if (dev <= 7) return "var(--c-orange)";
+    return "var(--c-red)";
+  }
   function setSlider(startHHMM, endHHMM) {
     var s = clamp(toMin(startHHMM) != null ? toMin(startHHMM) : START_TARGET, AXIS_START, AXIS_END);
     var e = clamp(toMin(endHHMM) != null ? toMin(endHHMM) : END_TARGET, AXIS_START, AXIS_END);
@@ -368,14 +376,15 @@
     $("tlEnd").style.left = ep + "%";
     $("tlFill").style.left = sp + "%";
     $("tlFill").style.width = (ep - sp) + "%";
-    $("tlFill").classList.toggle("late", !a.success);
-    $("tlStart").classList.toggle("late", !a.startOnTime);
-    $("tlEnd").classList.toggle("late", !a.endOnTime);
+
+    // colour each end by how late it is, and blend the fill between them
+    var cs = lateColor(a.startDev), ce = lateColor(a.endDev);
+    $("tlFill").style.background = "linear-gradient(90deg, " + cs + ", " + ce + ")";
+    $("tlStart").style.setProperty("--hc", cs);
+    $("tlEnd").style.setProperty("--hc", ce);
 
     $("startValue").textContent = fmt12(sHHMM);
     $("endValue").textContent = fmt12(eHHMM);
-    $("startValue").classList.toggle("late", !a.startOnTime);
-    $("endValue").classList.toggle("late", !a.endOnTime);
 
     setSliderAria($("tlStart"), sl.start, "start");
     setSliderAria($("tlEnd"), sl.end, "end");

@@ -20,7 +20,9 @@ this Sunday.
 
 Set the times on the **meeting timeline** — a line running 1:00 → 3:00 PM with
 dashed goal marks at 1:30 and 2:30. Drag the two handles (start and end) in
-one-minute steps; the readouts turn red the moment either runs late. The handles
+one-minute steps. Each end is colour-graded by how late it is — **green** on
+time, **gold** under 3 minutes late, **orange** 3–7 minutes, **red** beyond — and
+the line is a gradient blending the start colour into the end colour. The handles
 are keyboard-friendly too: focus one and use **← / →** (hold **Shift** for 5-minute
 jumps, **Home/End** for the extremes).
 
