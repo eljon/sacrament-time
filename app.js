@@ -5,7 +5,7 @@
   "use strict";
 
   // Bumped every commit (each commit is a new version).
-  var APP_VERSION = 36;
+  var APP_VERSION = 37;
 
   var DEFAULTS = window.APP_CONFIG || {};
   var LS_CONFIG = "stt.config";
@@ -518,7 +518,7 @@
     el.type = "button"; el.className = "cal"; el.setAttribute("data-date", dateStr);
     el.setAttribute("aria-label", MON[d.getMonth()] + " " + d.getDate());
     el.innerHTML = '<span class="cal-top">' + MON[d.getMonth()].toUpperCase() + '</span>' +
-      '<span class="cal-day">' + d.getDate() + '</span><span class="cal-dot"></span>';
+      '<span class="cal-day">' + d.getDate() + '</span><span class="cal-bar"></span>';
     el.addEventListener("click", function () {
       if (state.cf.moved) return;                 // was a drag, not a tap
       var idx = state.sundays.indexOf(dateStr);
@@ -558,10 +558,14 @@
     el.classList.toggle("is-center", isCenter);
     setDot(el, dateStr);
   }
+  // The card's status bar mirrors the timeline's start→end gradient for that week.
   function setDot(el, dateStr) {
-    var dot = el.querySelector(".cal-dot"), rec = recordFor(dateStr);
-    if (rec) { var a = analyze(rec); dot.style.background = lateColor(Math.max(a.startDev || 0, a.endDev || 0)); }
-    else dot.style.background = "transparent";
+    var bar = el.querySelector(".cal-bar"), rec = recordFor(dateStr);
+    if (rec) {
+      var a = analyze(rec);
+      var cs = lateColor(a.startDev), ce = lateColor(a.endDev);
+      bar.style.background = "linear-gradient(90deg, " + cs + ", " + ce + ")";
+    } else bar.style.background = "transparent";
   }
 
   // rAF engine: free momentum until slow, then ease-snap to the nearest card.
