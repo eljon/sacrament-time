@@ -286,11 +286,11 @@
       el.style.transform = "translateX(" + offset + "px)";
     }
     void axis.offsetWidth;              // reflow so this is the starting frame
-    for (i = 0; i < n; i++) {           // slide back to place; duration ∝ distance ⇒ same speed
-      offset = (0.5 - i / (n - 1)) * w;
+    for (i = 0; i < n; i++) {           // slide back to place; duration ∝ distance ⇒ same speed.
+      offset = (0.5 - i / (n - 1)) * w; // easing matches the line background so they settle together
       var dur = Math.max(0.001, MAX * (Math.abs(offset) / half));
       el = labels[i];
-      el.style.transition = "transform " + dur + "s linear";
+      el.style.transition = "transform " + dur + "s cubic-bezier(.5,0,.2,1)";
       el.style.transform = "translateX(0)";
     }
     setTimeout(function () {
