@@ -9,7 +9,7 @@
  *   START_TARGET / END_TARGET: the on-time cutoffs, 24-hour "HH:MM".
  */
 window.APP_CONFIG = {
-  WEB_APP_URL: "",
+  WEB_APP_URL: "https://script.google.com/macros/s/AKfycbxD1v71NZQ72sEEgp-SuS6Gt9MjLzwtM7UFB5G41o1GLBpyh7beO3vx38mx3bleuMRy/exec",
   SHARED_TOKEN: "",
   GOAL_STREAK: 12,
   START_TARGET: "13:30",

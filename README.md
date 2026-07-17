@@ -9,8 +9,10 @@ streak, success rate, and how close you are to your goal.
 - **No Google Cloud Console, no API keys.**
 - **Hosted on GitHub Pages** (or opened straight from a file).
 
-Until you connect a sheet, the app works right away by saving to your browser
-(`localStorage`), so you can try it before wiring anything up.
+The app ships pre-connected to a shared Google Sheet (set in `config.js`), so it
+syncs out of the box. Point it at a different sheet any time from **Settings**
+(⚙️) or by editing `config.js`. If you blank out the URL, it falls back to saving
+in your browser (`localStorage`).
 
 ## Using it
 
