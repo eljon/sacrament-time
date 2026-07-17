@@ -5,7 +5,7 @@
   "use strict";
 
   // Bumped every commit (each commit is a new version).
-  var APP_VERSION = 41;
+  var APP_VERSION = 42;
 
   var DEFAULTS = window.APP_CONFIG || {};
   var LS_CONFIG = "stt.config";

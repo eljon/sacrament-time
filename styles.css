@@ -102,7 +102,7 @@ h1 {
 .icon-btn {
   position: fixed; top: 16px; right: 16px; z-index: 20;
   border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
-  width: 40px; height: 40px; border-radius: 12px; font-size: 1.15rem; cursor: pointer;
+  width: 48px; height: 48px; border-radius: 14px; font-size: 1.3rem; cursor: pointer;
   box-shadow: var(--shadow); transition: color .15s, border-color .15s;
 }
 .icon-btn:hover { color: var(--brand); border-color: var(--brand); }
@@ -179,7 +179,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .tl-tick.t2 { left: 75%; }
 .tl-handle {
   --hc: var(--brand);
-  position: absolute; top: 50%; left: 25%; width: 40px; height: 40px; transform: translate(-50%, -50%);
+  position: absolute; top: 50%; left: 25%; width: 48px; height: 48px; transform: translate(-50%, -50%);
   border-radius: 50%; background: var(--card); border: 4px solid var(--hc); cursor: grab;
   padding: 0; touch-action: none; box-shadow: 0 3px 8px rgba(43,51,61,.2); transition: border-color .15s, box-shadow .15s;
   display: grid; place-items: center; z-index: 2;
@@ -190,9 +190,9 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 /* the handle is a little clock face; the hands show the time it's set to */
 .tl-clock { position: absolute; inset: 0; pointer-events: none; }
 .tl-hand { position: absolute; left: 50%; bottom: 50%; background: var(--hc); border-radius: 2px; transform-origin: 50% 100%; transition: transform .12s ease, background .15s; }
-.tl-hand.hour { width: 3px; height: 8px; margin-left: -1.5px; transform: rotate(var(--h, 0deg)); }
-.tl-hand.minute { width: 2px; height: 11px; margin-left: -1px; transform: rotate(var(--m, 0deg)); }
-.tl-hub { position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: var(--hc); transition: background .15s; }
+.tl-hand.hour { width: 3px; height: 10px; margin-left: -1.5px; transform: rotate(var(--h, 0deg)); }
+.tl-hand.minute { width: 2px; height: 13px; margin-left: -1px; transform: rotate(var(--m, 0deg)); }
+.tl-hub { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--hc); transition: background .15s; }
 @media (prefers-reduced-motion: reduce) { .tl-hand { transition: background .15s; } }
 /* the value flag above each handle */
 .tl-flag {
@@ -209,7 +209,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .hero-controls { position: relative; min-height: 48px; margin-top: 14px; }
 .tl-cluster { position: absolute; left: 50%; top: 50%; --fab-lift: -84px; transition: opacity .3s ease, visibility 0s; }
 .tl-cluster > button {
-  position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50%;
+  position: absolute; left: 0; top: 0; width: 48px; height: 48px; border-radius: 50%;
   border: 0; padding: 0; cursor: pointer; display: grid; place-items: center;
   font-weight: 900; line-height: 1;
 }
@@ -219,7 +219,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 
 /* save / record button (+ ↔ ✓) */
 .tl-fab {
-  z-index: 26; font-size: 1.25rem; background: var(--c-ok); color: #fff; border: 4px solid var(--c-ok);
+  z-index: 26; font-size: 1.45rem; background: var(--c-ok); color: #fff; border: 4px solid var(--c-ok);
   box-shadow: 0 4px 10px color-mix(in srgb, var(--c-ok) 45%, transparent);
   transform: translate(-50%, -50%);   /* dropped into the row (editing) */
   transition: transform .55s cubic-bezier(.4,0,.2,1), background .3s ease, color .2s ease, box-shadow .3s ease;
@@ -236,7 +236,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .tl-fab.as-check .fab-cp { opacity: 0; }
 
 /* at rest the two arms are the strokes of the + — 3px wide, centred, crossing */
-.fab-arm { position: absolute; left: 50%; bottom: 50%; width: 3px; height: 8.5px; margin-left: -1.5px; background: currentColor; border-radius: 2px; transform-origin: 50% 100%; }
+.fab-arm { position: absolute; left: 50%; bottom: 50%; width: 3px; height: 10px; margin-left: -1.5px; background: currentColor; border-radius: 2px; transform-origin: 50% 100%; }
 .fab-arm.hour { transform: rotate(0deg); }      /* vertical stroke */
 .fab-arm.minute { transform: rotate(90deg); }   /* horizontal stroke */
 .fab-arm::before { content: ""; position: absolute; top: 100%; left: 0; width: 100%; height: 100%; background: currentColor; border-radius: 2px; transform-origin: 50% 0; transform: scaleY(1); }  /* the other half of the stroke */
@@ -244,8 +244,8 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 /* loading: shorten the arms into clock hands (hour short, minute long), only one
    half each, pivoting at the centre. Each spins on its own — the minute hand 60x
    faster than the hour hand (real-clock 12:1 ratio). 3px wide, matching the + strokes. */
-.tl-fab.loading .fab-arm.hour   { height: 7px;  animation: fabHand 7.2s linear infinite; }
-.tl-fab.loading .fab-arm.minute { height: 11px; animation: fabHand 0.6s linear infinite; }
+.tl-fab.loading .fab-arm.hour   { height: 8.5px; animation: fabHand 7.2s linear infinite; }
+.tl-fab.loading .fab-arm.minute { height: 13px;  animation: fabHand 0.6s linear infinite; }
 .tl-fab.loading .fab-arm::before { transform: scaleY(0); }
 
 /* settling: the hands grow their other halves and equalise length → become the +
@@ -273,10 +273,10 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .tl-ctl.del { color: var(--late); }
 .tl-ctl.notes.has-note { color: var(--brand); border-color: var(--brand) !important; }
 #heroInput:not(.state-empty):not(.recorded) .tl-ctl { pointer-events: auto; opacity: 1; }
-#heroInput:not(.state-empty):not(.recorded) .tl-ctl.x { transform: translate(calc(-50% - 60px), -50%) scale(1); }
-#heroInput:not(.state-empty):not(.recorded) .tl-ctl.notes { transform: translate(calc(-50% + 60px), -50%) scale(1); }
+#heroInput:not(.state-empty):not(.recorded) .tl-ctl.x { transform: translate(calc(-50% - 66px), -50%) scale(1); }
+#heroInput:not(.state-empty):not(.recorded) .tl-ctl.notes { transform: translate(calc(-50% + 66px), -50%) scale(1); }
 /* delete sits just left of ✕, and only for an already-saved week being edited */
-#heroInput.editing.has-record .tl-ctl.del { pointer-events: auto; opacity: 1; transform: translate(calc(-50% - 114px), -50%) scale(1); }
+#heroInput.editing.has-record .tl-ctl.del { pointer-events: auto; opacity: 1; transform: translate(calc(-50% - 126px), -50%) scale(1); }
 #heroInput:not(.has-record) .tl-ctl.del { opacity: 0 !important; pointer-events: none !important; transform: translate(-50%, -50%) scale(.2) !important; }
 .tl-ctl:hover { filter: brightness(.98); }
 
@@ -309,11 +309,11 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 @media (max-width: 420px) {
   .timeline { padding: 58px 16px 0; }
   .tl-time { font-size: 1.35rem; }
-  .tl-handle { width: 44px; height: 44px; }
+  .tl-handle { width: 53px; height: 53px; }
 }
 
 .btn {
-  font: inherit; font-weight: 800; border-radius: 11px; padding: 11px 18px;
+  font: inherit; font-weight: 800; border-radius: 11px; padding: 13px 22px;
   border: 1px solid transparent; cursor: pointer; transition: filter .15s, background .15s, border-color .15s;
 }
 .btn.primary {
@@ -321,11 +321,11 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 28%, transparent);
 }
 .btn.primary:hover { filter: brightness(1.05); }
-.btn.big { flex: 1; font-size: 1.02rem; padding: 13px 18px; }
+.btn.big { flex: 1; font-size: 1.02rem; padding: 16px 22px; }
 .btn.ghost { background: var(--card); color: var(--ink); border-color: var(--line); }
 .btn.ghost:hover { border-color: var(--brand); color: var(--brand); }
 .btn.ghost.danger:hover { border-color: var(--late); color: var(--late); }
-.btn.small { padding: 8px 14px; font-size: .84rem; }
+.btn.small { padding: 10px 17px; font-size: .84rem; }
 
 /* recorded state: the timeline stays, but reads as a record, not a control */
 .recorded .tl-track { pointer-events: none; }
@@ -338,9 +338,9 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .recorded-head[hidden] { display: none; }
 .recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; animation: recIn .45s ease both; }
 .rec-edit {
-  flex: none; width: 30px; height: 30px; border-radius: 50%;
+  flex: none; width: 36px; height: 36px; border-radius: 50%;
   border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
-  font-size: .95rem; line-height: 1; cursor: pointer; display: grid; place-items: center;
+  font-size: 1.1rem; line-height: 1; cursor: pointer; display: grid; place-items: center;
   box-shadow: 0 2px 6px rgba(43,51,61,.12); transition: color .15s, border-color .15s, transform .12s;
 }
 .rec-edit:hover { color: var(--brand); border-color: var(--brand); }
