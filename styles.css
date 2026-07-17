@@ -107,6 +107,15 @@ h1 {
 }
 .icon-btn:hover { color: var(--brand); border-color: var(--brand); }
 
+.app-version {
+  position: fixed; top: 16px; left: 16px; z-index: 20;
+  font-size: .72rem; font-weight: 800; letter-spacing: .04em;
+  color: var(--ink-soft); opacity: .55;
+  padding: 6px 10px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--line);
+  box-shadow: var(--shadow); font-variant-numeric: tabular-nums;
+}
+
 /* banner */
 .banner {
   margin-top: 14px; background: var(--card); color: var(--ink-soft);

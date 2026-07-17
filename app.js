@@ -4,6 +4,9 @@
 (function () {
   "use strict";
 
+  // Bumped every commit (each commit is a new version).
+  var APP_VERSION = 35;
+
   var DEFAULTS = window.APP_CONFIG || {};
   var LS_CONFIG = "stt.config";
   var LS_LOCAL = "stt.records"; // browser-only fallback store
@@ -829,6 +832,9 @@
     $("cfgTestBtn").addEventListener("click", testConnection);
     $("cfgSaveBtn").addEventListener("click", saveSettings);
     $("cfgCancelBtn").addEventListener("click", function () { $("settingsDialog").close(); });
+
+    var vEl = $("appVersion");
+    if (vEl) vEl.textContent = "v" + APP_VERSION;
 
     startFabLoading();
     var t0 = Date.now();
