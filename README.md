@@ -23,8 +23,10 @@ carries kinetic momentum and snaps to the nearest week, or tap any card to glide
 it to centre (you can't go past this Sunday). Logged weeks show a small status
 dot coloured by how on-time they were.
 
-Set the times on the **meeting timeline** — a line running 1:00 → 3:00 PM with
-dashed goal marks at 1:30 and 2:30. Drag the two handles (start and end) in
+A week you haven't logged shows a single round **＋** button where the timeline
+will be. Tap it and it splits into the two handles and grows the **meeting
+timeline** — a line running 1:00 → 3:00 PM with dashed goal marks at 1:30 and
+2:30. Drag the two handles (start and end) in
 one-minute steps. Each end is colour-graded by how late it is on a continuous
 ramp — **green** on time, blending to **yellow** at 3 minutes late, **orange** at
 6, and full **red** at 10 — and the line is a gradient blending the start colour
@@ -32,10 +34,10 @@ into the end colour. The handles
 are keyboard-friendly too: focus one and use **← / →** (hold **Shift** for 5-minute
 jumps, **Home/End** for the extremes).
 
-Hit **Record it** and the timeline stays put as the record itself — the cream
-track lane and drag hint drop away, leaving just the coloured line and its
-handles, plus a one-line verdict. **Edit** makes it draggable again; **Remove**
-clears the week.
+Tap the round **✓** button at the middle of the line to save. The timeline then
+stays put as the record itself — the cream track lane, axis, and drag hint drop
+away, leaving just the coloured line and its handles, plus a one-line verdict.
+**Edit** makes it draggable again; **Remove** clears the week.
 
 ---
 

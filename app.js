@@ -37,7 +37,7 @@
   var state = {
     records: [], loading: false, selected: null, heroMode: "auto", slider: null, dragging: null,
     cf: { pos: 0, vel: 0, target: null, dragging: false, raf: null, startX: 0, startPos: 0, lastX: 0, vpx: 0, moved: false },
-    cfCenter: null,
+    cfCenter: null, armed: false, heroView: null,
   };
 
   // ---- Time helpers ---------------------------------------------------------
@@ -220,37 +220,74 @@
     }
     renderHeroBody();
   }
+  // Three views of a week:
+  //  empty    — no record yet, not started: just the round record button.
+  //  editing  — timeline is formed and draggable; the round button becomes ✓.
+  //  recorded — a saved week shown read-only.
   function renderHeroBody() {
-    var sel = state.selected;
-    var rec = recordFor(sel);
+    var sel = state.selected, rec = recordFor(sel);
+    var isEditing = (rec && state.heroMode === "edit") || (!rec && state.armed);
+    var isEmpty = !rec && !isEditing;
+    var isRecorded = rec && !isEditing;
+    state.editing = isEditing;
+    state.heroView = isEmpty ? "empty" : (isEditing ? "editing" : "recorded");
 
-    var editing = state.heroMode === "edit" || (state.heroMode === "auto" && !rec);
-    state.editing = editing;
+    var form = $("heroInput");
+    form.classList.toggle("state-empty", isEmpty);
+    form.classList.toggle("recorded", isRecorded);
 
-    // the slider always reflects the current record (or the targets when new)
     setSlider(rec ? rec.start : cfg.startTarget, rec ? rec.end : cfg.endTarget);
-    setHandlesInteractive(editing);
-    $("heroInput").classList.toggle("recorded", !editing);
+    setHandlesInteractive(isEditing);
 
-    // editable controls
-    $("notes").hidden = !editing;
-    $("saveBtn").hidden = !editing;
-    $("cancelEditBtn").hidden = !(editing && rec); // cancel only when editing an existing record
-    // recorded controls
-    $("editBtn").hidden = editing;
-    $("clearBtn").hidden = editing;
+    var fab = $("recordFab");
+    fab.hidden = isRecorded;
+    fab.textContent = isEmpty ? "+" : "✓";
+    fab.setAttribute("aria-label", isEmpty ? "Record this week" : "Save");
 
-    if (editing) {
-      $("notes").value = rec ? (rec.notes || "") : "";
-      $("saveBtn").textContent = rec ? "Update" : "Record it";
-      $("recVerdict").hidden = true;
-      $("recNotes").hidden = true;
-    } else {
+    $("notes").hidden = !isEditing;
+    $("editBtn").hidden = !isRecorded;
+    $("clearBtn").hidden = isEmpty;
+    $("clearBtn").textContent = (!rec && isEditing) ? "Cancel" : "Remove";
+
+    if (isRecorded) {
       $("recVerdict").hidden = false;
       $("recVerdict").textContent = verdict(analyze(rec));
       if (rec.notes) { $("recNotes").hidden = false; $("recNotes").textContent = "“" + rec.notes + "”"; }
       else { $("recNotes").hidden = true; }
+    } else {
+      $("recVerdict").hidden = true; $("recNotes").hidden = true;
     }
+  }
+
+  // tap the record button on an empty week → split it into the timeline
+  function armAndForm() {
+    state.armed = true; state.heroMode = "auto";
+    $("notes").value = "";
+    renderHeroBody();
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce) formAnimate();
+  }
+  function formAnimate() {
+    var s = $("tlStart"), e = $("tlEnd"), f = $("tlFill");
+    // collapse both handles + fill to the centre, instantly
+    s.style.transition = "none"; e.style.transition = "none"; f.style.transition = "none";
+    s.style.left = "50%"; e.style.left = "50%"; f.style.left = "50%"; f.style.width = "0%";
+    void $("tlTrack").offsetWidth; // reflow so the collapse is the animation's start
+    var ease = "left .5s cubic-bezier(.34,.72,.2,1)";
+    s.style.transition = ease; e.style.transition = ease;
+    f.style.transition = "left .5s cubic-bezier(.34,.72,.2,1), width .5s cubic-bezier(.34,.72,.2,1)";
+    renderTimeline(); // sets real positions → they slide apart, line grows
+    setTimeout(function () { s.style.transition = ""; e.style.transition = ""; f.style.transition = ""; }, 540);
+  }
+  function saveHero() {
+    var existing = recordFor(state.selected);
+    var rec = { id: existing ? existing.id : "", date: state.selected, start: $("start").value, end: $("end").value, notes: $("notes").value.trim() };
+    if (!rec.date || !rec.start || !rec.end) { toast("Set the times"); return; }
+    var fab = $("recordFab"); fab.disabled = true;
+    var op = rec.id ? updateRecord(rec) : addRecord(rec);
+    op.then(function () { state.heroMode = "auto"; state.armed = false; renderAll(); toast(existing ? "Week updated" : "Week recorded"); })
+      .catch(function (err) { toast("Error: " + err.message); })
+      .finally(function () { fab.disabled = false; });
   }
   function setHandlesInteractive(on) {
     [$("tlStart"), $("tlEnd")].forEach(function (h) {
@@ -342,7 +379,7 @@
       mid.appendChild(times);
       if (r.notes) { var nt = document.createElement("div"); nt.className = "entry-notes"; nt.textContent = r.notes; mid.appendChild(nt); }
       var actions = document.createElement("div"); actions.className = "entry-actions";
-      actions.appendChild(miniBtn("✎", "Edit", function () { goToWeek(r.date); state.heroMode = "edit"; renderHero(); scrollToHero(); }));
+      actions.appendChild(miniBtn("✎", "Edit", function () { goToWeek(r.date); state.heroMode = "edit"; $("notes").value = r.notes || ""; renderHeroBody(); scrollToHero(); }));
       actions.appendChild(miniBtn("✕", "Delete", function () { confirmDelete(r); }));
       el.appendChild(d); el.appendChild(mid); el.appendChild(actions);
       host.appendChild(el);
@@ -457,6 +494,7 @@
     if (ci === state.cfCenter) return;
     state.cfCenter = ci;
     state.selected = state.sundays[ci];
+    state.armed = false; state.heroMode = "auto"; // moving to a new week resets edit state
     renderHeroBody();
   }
   function animateTo(idx) { state.heroMode = "auto"; state.cf.target = clampPos(idx); state.cf.vel = 0; cfEnsureRaf(); }
@@ -590,7 +628,7 @@
     return Math.round(AXIS_START + ((clientX - rect.left) / rect.width) * AXIS_SPAN);
   }
   function onTimelinePointerDown(ev) {
-    if (!state.editing) return;
+    if (!state.editing || ev.target === $("recordFab")) return;
     var m = minFromClientX(ev.clientX); if (m == null) return;
     var which;
     if (ev.target === $("tlStart") || $("tlStart").contains(ev.target)) which = "start";
@@ -617,27 +655,9 @@
     ev.preventDefault();
   }
 
-  function onSubmit(ev) {
-    ev.preventDefault();
-    var existing = recordFor(state.selected);
-    var rec = {
-      id: existing ? existing.id : "",
-      date: state.selected,
-      start: $("start").value, end: $("end").value, notes: $("notes").value.trim(),
-    };
-    if (!rec.date || !rec.start || !rec.end) { toast("Fill in start and end"); return; }
-    var btn = $("saveBtn"); btn.disabled = true;
-    var op = rec.id ? updateRecord(rec) : addRecord(rec);
-    op.then(function () {
-      state.heroMode = "auto"; renderAll();
-      toast(existing ? "Week updated" : "Week recorded");
-    }).catch(function (err) { toast("Error: " + err.message); })
-      .finally(function () { btn.disabled = false; });
-  }
-
   function confirmDelete(r) {
     if (!window.confirm("Delete the entry for " + shortDate(r.date) + "?")) return;
-    deleteRecord(r.id).then(function () { state.heroMode = "auto"; renderAll(); toast("Deleted"); })
+    deleteRecord(r.id).then(function () { state.heroMode = "auto"; state.armed = false; renderAll(); toast("Deleted"); })
       .catch(function (err) { toast("Error: " + err.message); });
   }
 
@@ -685,7 +705,11 @@
     }
     state.selected = mostRecentSunday();
     buildCoverflow();
-    $("heroInput").addEventListener("submit", onSubmit);
+    $("heroInput").addEventListener("submit", function (e) { e.preventDefault(); });
+    $("recordFab").addEventListener("click", function () {
+      if (state.heroView === "empty") armAndForm();
+      else if (state.heroView === "editing") saveHero();
+    });
     $("tlTrack").addEventListener("pointerdown", onTimelinePointerDown);
     document.addEventListener("pointermove", function (e) { if (state.dragging) { var m = minFromClientX(e.clientX); if (m != null) setHandle(state.dragging, m); } });
     document.addEventListener("pointerup", function () { state.dragging = null; });
@@ -697,9 +721,12 @@
     document.addEventListener("pointermove", function (e) { if (state.cf.dragging) cfMove(e); });
     document.addEventListener("pointerup", function () { if (state.cf.dragging) cfUp(); });
     document.addEventListener("pointercancel", function () { if (state.cf.dragging) cfUp(); });
-    $("editBtn").addEventListener("click", function () { state.heroMode = "edit"; renderHero(); });
-    $("cancelEditBtn").addEventListener("click", function () { state.heroMode = "auto"; renderHero(); });
-    $("clearBtn").addEventListener("click", function () { var r = recordFor(state.selected); if (r) confirmDelete(r); });
+    $("editBtn").addEventListener("click", function () { var r = recordFor(state.selected); state.heroMode = "edit"; if (r) $("notes").value = r.notes || ""; renderHeroBody(); });
+    $("clearBtn").addEventListener("click", function () {
+      var r = recordFor(state.selected);
+      if (r) confirmDelete(r);
+      else { state.armed = false; renderHeroBody(); } // cancel a not-yet-saved week
+    });
     $("refreshBtn").addEventListener("click", function () { loadRecords().then(renderAll).catch(function (err) { toast("Error: " + err.message); }); });
     $("settingsBtn").addEventListener("click", openSettings);
     $("cfgTestBtn").addEventListener("click", testConnection);

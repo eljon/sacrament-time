@@ -183,6 +183,27 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 }
 .tl-cap { font-size: .6rem; font-weight: 800; letter-spacing: .14em; color: var(--ink-soft); }
 .tl-time { font-size: 1.55rem; font-weight: 900; color: var(--hc); }
+
+/* record button — lives at the middle of the timeline */
+.tl-fab {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 20;
+  border: 0; cursor: pointer; border-radius: 50%; color: var(--brand-ink); padding: 0;
+  background: linear-gradient(180deg, var(--brand), var(--brand-2));
+  display: grid; place-items: center; font-weight: 900; line-height: 1;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--brand) 42%, transparent);
+  width: 34px; height: 34px; font-size: 1.15rem;   /* confirm size (editing) */
+  transition: width .38s cubic-bezier(.34,.72,.2,1), height .38s cubic-bezier(.34,.72,.2,1), box-shadow .3s;
+}
+.tl-fab:hover { filter: brightness(1.06); }
+.tl-fab:active { transform: translate(-50%, -50%) scale(.94); }
+.state-empty .tl-fab { width: 62px; height: 62px; font-size: 2rem; }
+
+/* empty state: only the record button shows; the timeline is not formed yet */
+.state-empty .tl-track { background: transparent; border-color: transparent; }
+.state-empty .tl-fill, .state-empty .tl-tick { opacity: 0; }
+.state-empty .tl-handle { opacity: 0; pointer-events: none; }
+.state-empty .tl-axis, .state-empty .tl-help { display: none; }
+.recorded .tl-fab { display: none; }
 .tl-axis { display: flex; justify-content: space-between; margin-top: 14px; font-size: .68rem; font-weight: 800; color: var(--muted); }
 .tl-help { text-align: center; font-size: .72rem; color: var(--muted); font-weight: 700; margin-top: 9px; }
 

@@ -47,6 +47,7 @@
               <span class="tl-flag"><span class="tl-cap">END</span><span class="tl-time" id="endValue">—</span></span>
               <span class="tl-clock"><span class="tl-hand hour"></span><span class="tl-hand minute"></span><span class="tl-hub"></span></span>
             </button>
+            <button type="button" class="tl-fab" id="recordFab" aria-label="Record this week">+</button>
           </div>
           <div class="tl-axis">
             <span>1:00</span><span>1:30</span><span>2:00</span><span>2:30</span><span>3:00</span>
@@ -62,8 +63,6 @@
 
         <input type="text" id="notes" class="notes-input" placeholder="Add a note (optional)" maxlength="140" />
         <div class="hero-actions">
-          <button type="submit" class="btn primary big" id="saveBtn">Record it</button>
-          <button type="button" class="btn ghost" id="cancelEditBtn" hidden>Cancel</button>
           <button type="button" class="btn ghost big" id="editBtn" hidden>Edit</button>
           <button type="button" class="btn ghost danger" id="clearBtn" hidden>Remove</button>
         </div>
