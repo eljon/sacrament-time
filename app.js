@@ -5,7 +5,7 @@
   "use strict";
 
   // Bumped every commit (each commit is a new version).
-  var APP_VERSION = 37;
+  var APP_VERSION = 38;
 
   var DEFAULTS = window.APP_CONFIG || {};
   var LS_CONFIG = "stt.config";
@@ -248,16 +248,15 @@
     fab.setAttribute("aria-label", isEmpty ? "Record this week" : "Save");
     $("notesBtn").classList.toggle("has-note", !!$("notes").value);
 
-    $("editBtn").hidden = !isRecorded;
     $("clearBtn").hidden = !isRecorded;
 
     if (isRecorded) {
-      $("recVerdict").hidden = false;
+      $("recHead").hidden = false;
       $("recVerdict").textContent = verdict(analyze(rec));
       if (rec.notes) { $("recNotes").hidden = false; $("recNotes").textContent = "“" + rec.notes + "”"; }
       else { $("recNotes").hidden = true; }
     } else {
-      $("recVerdict").hidden = true; $("recNotes").hidden = true;
+      $("recHead").hidden = true; $("recNotes").hidden = true;
     }
   }
 
@@ -379,10 +378,24 @@
     var rec = { id: existing ? existing.id : "", date: state.selected, start: $("start").value, end: $("end").value, notes: $("notes").value.trim() };
     if (!rec.date || !rec.start || !rec.end) { toast("Set the times"); return; }
     var fab = $("recordFab"); fab.disabled = true;
+    // the ✓ turns back into the spinning clock while the save is in flight
+    var animate = !prefersReduced();
+    if (animate) { fab.classList.remove("as-check"); startFabLoading(); }
+    var t0 = Date.now();
     var op = rec.id ? updateRecord(rec) : addRecord(rec);
-    op.then(function () { state.heroMode = "auto"; state.armed = false; renderAll(); toast(existing ? "Week updated" : "Week recorded"); })
-      .catch(function (err) { toast("Error: " + err.message); })
-      .finally(function () { fab.disabled = false; });
+    op.then(function () {
+      state.heroMode = "auto"; state.armed = false;
+      var wait = animate ? Math.max(0, 700 - (Date.now() - t0)) : 0;
+      setTimeout(function () {
+        fab.classList.remove("loading", "settling"); fab.disabled = false;
+        renderAll();   // → recorded view: the clock settles into the verdict comment
+        toast(existing ? "Week updated" : "Week recorded");
+      }, wait);
+    }).catch(function (err) {
+      fab.classList.remove("loading", "settling"); fab.disabled = false;
+      renderHeroBody();   // restore the ✓ so the user can retry
+      toast("Error: " + err.message);
+    });
   }
   function setHandlesInteractive(on) {
     [$("tlStart"), $("tlEnd")].forEach(function (h) {
@@ -825,7 +838,7 @@
     $("notesSaveBtn").addEventListener("click", commitNote);
     $("notesCancelBtn").addEventListener("click", function () { $("notesDialog").close(); });
     window.addEventListener("resize", positionFab);
-    $("editBtn").addEventListener("click", function () { var r = recordFor(state.selected); state.heroMode = "edit"; if (r) $("notes").value = r.notes || ""; renderHeroBody(); });
+    $("recEditBtn").addEventListener("click", function () { var r = recordFor(state.selected); state.heroMode = "edit"; if (r) $("notes").value = r.notes || ""; renderHeroBody(); });
     $("clearBtn").addEventListener("click", function () {
       var r = recordFor(state.selected);
       if (r) confirmDelete(r);

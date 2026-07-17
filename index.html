@@ -58,12 +58,17 @@
         <input type="hidden" id="end" />
         <input type="hidden" id="notes" />
 
-        <p class="recorded-verdict" id="recVerdict" hidden></p>
+        <!-- recorded view: the saved verdict comment with an edit pencil beside it -->
+        <div class="recorded-head" id="recHead" hidden>
+          <p class="recorded-verdict" id="recVerdict"></p>
+          <button type="button" class="rec-edit" id="recEditBtn" aria-label="Edit this week">✎</button>
+        </div>
         <p class="recorded-notes" id="recNotes" hidden></p>
 
         <div class="hero-controls">
           <!-- the + starts up on the timeline; on tap it drops here and the two
-               satellites (cancel · notes) slide out from it -->
+               satellites (cancel · notes) slide out from it. On save the ✓ turns
+               back into the spinning clock, then settles into the verdict above. -->
           <div class="tl-cluster">
             <button type="button" class="tl-ctl x" id="cancelBtn" aria-label="Cancel">✕</button>
             <button type="button" class="tl-fab" id="recordFab" aria-label="Record this week">
@@ -73,7 +78,6 @@
             <button type="button" class="tl-ctl notes" id="notesBtn" aria-label="Add a note">✎</button>
           </div>
           <div class="hero-actions">
-            <button type="button" class="btn ghost big" id="editBtn" hidden>Edit</button>
             <button type="button" class="btn ghost danger" id="clearBtn" hidden>Remove</button>
           </div>
         </div>
