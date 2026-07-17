@@ -284,7 +284,7 @@
     // each hand keeps its own speed for P1, then eases to a stop forming the +.
     // minute lands horizontal (≡90° mod 180), hour lands vertical (≡0° mod 180),
     // so they're perpendicular and match the rest state seamlessly on clear.
-    var P1 = 300, P2 = 700, mSpeed = 300, hSpeed = 5;   // deg/s, matching the CSS
+    var P1 = 300, P2 = 700, mSpeed = 600, hSpeed = 10;  // deg/s, matching the CSS
     var mMid = mStart + mSpeed * (P1 / 1000);
     var hMid = hStart + hSpeed * (P1 / 1000);
     var mTarget = Math.round((mMid - 90) / 180) * 180 + 90;

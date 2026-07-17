@@ -233,8 +233,8 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 /* loading: shorten the arms into clock hands (hour short, minute long), only one
    half each, pivoting at the centre. Each spins on its own — the minute hand 60x
    faster than the hour hand, like a real clock. 3px wide, matching the + strokes. */
-.tl-fab.loading .fab-arm.hour   { height: 7px;  animation: fabHand 72s linear infinite; }
-.tl-fab.loading .fab-arm.minute { height: 11px; animation: fabHand 1.2s linear infinite; }
+.tl-fab.loading .fab-arm.hour   { height: 7px;  animation: fabHand 36s linear infinite; }
+.tl-fab.loading .fab-arm.minute { height: 11px; animation: fabHand 0.6s linear infinite; }
 .tl-fab.loading .fab-arm::before { transform: scaleY(0); }
 
 /* settling: the hands grow their other halves and equalise length → become the +
