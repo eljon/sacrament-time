@@ -356,11 +356,11 @@
   function scrollToHero() { document.querySelector(".hero").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
   // ---- Timeline slider ------------------------------------------------------
-  // Continuous colour for how late an end is: green when on time, easing a
-  // little further toward red with every minute late, through the gold/orange
-  // anchors so the ramp stays clean instead of muddy. Anchors are read from the
-  // CSS variables so the scale follows the light/dark theme.
-  var STOPS = null;
+  // Continuous colour for how late an end is: a straight green→red blend that
+  // eases one step per minute and reaches full red at LATE_FULL minutes. Anchors
+  // are read from the CSS variables so the scale follows the light/dark theme.
+  var LATE_FULL = 10;
+  var GREEN = null, RED = null;
   function parseColor(str) {
     str = (str || "").trim();
     if (str.charAt(0) === "#") {
@@ -374,24 +374,13 @@
   }
   function loadStops() {
     var cs = getComputedStyle(document.documentElement);
-    // minutes-late anchor → colour
-    STOPS = [
-      { m: 0, c: parseColor(cs.getPropertyValue("--c-ok")) },
-      { m: 3, c: parseColor(cs.getPropertyValue("--c-yellow")) },
-      { m: 6, c: parseColor(cs.getPropertyValue("--c-orange")) },
-      { m: 10, c: parseColor(cs.getPropertyValue("--c-red")) },
-    ];
+    GREEN = parseColor(cs.getPropertyValue("--c-ok"));
+    RED = parseColor(cs.getPropertyValue("--c-red"));
   }
   function lateColor(dev) {
-    if (!STOPS) loadStops();
-    if (dev == null || dev <= 0) return rgb(STOPS[0].c);
-    for (var i = 1; i < STOPS.length; i++) {
-      if (dev <= STOPS[i].m) {
-        var t = (dev - STOPS[i - 1].m) / (STOPS[i].m - STOPS[i - 1].m);
-        return rgb(mixColor(STOPS[i - 1].c, STOPS[i].c, t));
-      }
-    }
-    return rgb(STOPS[STOPS.length - 1].c);
+    if (!GREEN) loadStops();
+    if (dev == null || dev <= 0) return rgb(GREEN);
+    return rgb(mixColor(GREEN, RED, Math.min(dev / LATE_FULL, 1)));
   }
   function mixColor(a, b, t) {
     return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)];

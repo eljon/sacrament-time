@@ -21,9 +21,9 @@ this Sunday.
 Set the times on the **meeting timeline** — a line running 1:00 → 3:00 PM with
 dashed goal marks at 1:30 and 2:30. Drag the two handles (start and end) in
 one-minute steps. Each end is colour-graded by how late it is on a continuous
-ramp that eases a little further from **green** toward **red** with every minute
-late (through gold and orange on the way), and the line is a gradient blending
-the start colour into the end colour. The handles
+**green → red** ramp — one step further per minute, reaching full red at 10
+minutes late — and the line is a gradient blending the start colour into the end
+colour. The handles
 are keyboard-friendly too: focus one and use **← / →** (hold **Shift** for 5-minute
 jumps, **Home/End** for the extremes).
 
