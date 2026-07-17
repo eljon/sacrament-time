@@ -269,7 +269,33 @@
     tl.classList.add("forming");     // enable the unfold transitions
     void tl.offsetWidth;             // make sure they're live before the state flips
     renderHeroBody();                // drops .state-empty → everything animates out from centre
+    slideAxisLabels();               // slide the time labels out from the centre
     setTimeout(function () { tl.classList.remove("forming"); }, 840);
+  }
+  // Slide each axis label from the centre to its position at a constant speed,
+  // so the outer labels (farther to travel) finish last.
+  function slideAxisLabels() {
+    var axis = document.querySelector(".tl-axis"), labels = axis.children, n = labels.length;
+    var w = axis.getBoundingClientRect().width;
+    if (!w || n < 2) return;
+    var MAX = 0.7, half = 0.5 * w, i, el, offset;
+    for (i = 0; i < n; i++) {           // collapse every label to the centre, no transition
+      offset = (0.5 - i / (n - 1)) * w;
+      el = labels[i];
+      el.style.transition = "none";
+      el.style.transform = "translateX(" + offset + "px)";
+    }
+    void axis.offsetWidth;              // reflow so this is the starting frame
+    for (i = 0; i < n; i++) {           // slide back to place; duration ∝ distance ⇒ same speed
+      offset = (0.5 - i / (n - 1)) * w;
+      var dur = Math.max(0.001, MAX * (Math.abs(offset) / half));
+      el = labels[i];
+      el.style.transition = "transform " + dur + "s linear";
+      el.style.transform = "translateX(0)";
+    }
+    setTimeout(function () {
+      for (var k = 0; k < labels.length; k++) { labels[k].style.transition = ""; labels[k].style.transform = ""; }
+    }, MAX * 1000 + 80);
   }
   function cancelEdit() {
     if (recordFor(state.selected)) state.heroMode = "auto"; // back to the recorded view

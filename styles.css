@@ -248,7 +248,8 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .timeline.forming .tl-fill,
 .timeline.forming .tl-tick { transition: left .7s cubic-bezier(.5,0,.2,1), width .7s cubic-bezier(.5,0,.2,1), opacity .5s ease; }
 .timeline.forming .tl-flag { transition: opacity .5s ease .15s; }
-.timeline.forming .tl-axis { transition: clip-path .7s cubic-bezier(.5,0,.2,1), opacity .45s ease; }
+/* .tl-axis labels slide out from the centre — driven per-label from JS so the
+   outer labels (farther to travel) move at the same speed and finish last. */
 
 /* empty: the timeline is folded into the centre, behind the + button */
 .state-empty .tl-track::before { transform: scaleX(0); opacity: 0; }
@@ -256,8 +257,8 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .state-empty .tl-tick { left: 50% !important; opacity: 0; }
 .state-empty .tl-handle { left: 50% !important; opacity: 0; pointer-events: none; }
 .state-empty .tl-flag { opacity: 0; }
-.state-empty .tl-axis { clip-path: inset(0 50% 0 50%); opacity: 0; }
-.tl-axis { display: flex; justify-content: space-between; margin-top: 14px; font-size: .68rem; font-weight: 800; color: var(--muted); clip-path: inset(0 -3% 0 -3%); transition: opacity .3s ease; }
+.state-empty .tl-axis { opacity: 0; }
+.tl-axis { display: flex; justify-content: space-between; margin-top: 14px; font-size: .68rem; font-weight: 800; color: var(--muted); transition: opacity .35s ease; }
 
 @media (max-width: 420px) {
   .timeline { padding: 58px 16px 0; }
