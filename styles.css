@@ -184,26 +184,33 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .tl-cap { font-size: .6rem; font-weight: 800; letter-spacing: .14em; color: var(--ink-soft); }
 .tl-time { font-size: 1.55rem; font-weight: 900; color: var(--hc); }
 
-/* record button — lives at the middle of the timeline */
+/* record button — concentric on the line, same size as a handle, green */
 .tl-fab {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 20;
-  border: 0; cursor: pointer; border-radius: 50%; color: var(--brand-ink); padding: 0;
-  background: linear-gradient(180deg, var(--brand), var(--brand-2));
-  display: grid; place-items: center; font-weight: 900; line-height: 1;
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--brand) 42%, transparent);
-  width: 34px; height: 34px; font-size: 1.15rem;   /* confirm size (editing) */
-  transition: width .38s cubic-bezier(.34,.72,.2,1), height .38s cubic-bezier(.34,.72,.2,1), box-shadow .3s;
+  width: 40px; height: 40px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+  display: grid; place-items: center; font-weight: 900; line-height: 1; font-size: 1.25rem;
+  background: var(--c-ok); color: #fff;      /* confirm (editing): solid green ✓ */
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--c-ok) 45%, transparent);
+  transition: opacity .3s ease, transform .35s cubic-bezier(.3,.8,.3,1), background .25s ease, box-shadow .25s ease;
 }
-.tl-fab:hover { filter: brightness(1.06); }
-.tl-fab:active { transform: translate(-50%, -50%) scale(.94); }
-.state-empty .tl-fab { width: 62px; height: 62px; font-size: 2rem; }
+.tl-fab:hover { filter: brightness(1.05); }
+.state-empty .tl-fab {              /* empty: white face, green ring, green + — like a handle */
+  background: var(--card); color: var(--c-ok); border: 4px solid var(--c-ok);
+  font-size: 1.55rem; box-shadow: 0 3px 8px rgba(43, 51, 61, .2);
+}
+.recorded .tl-fab { display: none; }
+
+/* smooth fades between empty / editing / recorded */
+.tl-track { transition: background-color .35s ease, border-color .35s ease; }
+.tl-fill, .tl-tick { transition: opacity .35s ease; }
+.tl-handle { transition: opacity .35s ease, box-shadow .15s, border-color .15s; }
+.tl-axis, .tl-help { transition: opacity .3s ease; }
 
 /* empty state: only the record button shows; the timeline is not formed yet */
 .state-empty .tl-track { background: transparent; border-color: transparent; }
 .state-empty .tl-fill, .state-empty .tl-tick { opacity: 0; }
 .state-empty .tl-handle { opacity: 0; pointer-events: none; }
-.state-empty .tl-axis, .state-empty .tl-help { display: none; }
-.recorded .tl-fab { display: none; }
+.state-empty .tl-axis, .state-empty .tl-help { opacity: 0; pointer-events: none; }
 .tl-axis { display: flex; justify-content: space-between; margin-top: 14px; font-size: .68rem; font-weight: 800; color: var(--muted); }
 .tl-help { text-align: center; font-size: .72rem; color: var(--muted); font-weight: 700; margin-top: 9px; }
 
@@ -242,7 +249,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .recorded .tl-track { background: transparent; border-color: transparent; pointer-events: none; }
 .recorded .tl-handle { cursor: default; box-shadow: 0 2px 5px rgba(43,51,61,.16); }
 .recorded .tl-help,
-.recorded .tl-axis { display: none; }
+.recorded .tl-axis { opacity: 0; pointer-events: none; }
 .recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; margin-top: 18px; }
 .recorded-notes { text-align: center; color: var(--ink-soft); font-weight: 600; margin-top: 4px; font-style: italic; }
 

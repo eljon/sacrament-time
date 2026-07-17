@@ -259,25 +259,46 @@
     }
   }
 
-  // tap the record button on an empty week → split it into the timeline
+  function prefersReduced() { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+
+  // tap the record button on an empty week → the + splits into the two handles
   function armAndForm() {
-    state.armed = true; state.heroMode = "auto";
-    $("notes").value = "";
-    renderHeroBody();
-    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!reduce) formAnimate();
+    state.armed = true; state.heroMode = "auto"; $("notes").value = "";
+    if (prefersReduced()) { renderHeroBody(); return; }
+    var fab = $("recordFab");
+    // 1. the + shrinks away at the centre
+    fab.style.transition = "opacity .2s ease, transform .2s cubic-bezier(.4,.0,.6,1)";
+    fab.style.opacity = "0"; fab.style.transform = "translate(-50%,-50%) scale(.35)";
+    setTimeout(function () {
+      // 2. form the timeline; the two handles are born at the centre and glide apart
+      renderHeroBody();          // editing view (fab becomes ✓ but held hidden)
+      fab.style.opacity = "0"; fab.style.transform = "translate(-50%,-50%) scale(.35)";
+      splitHandles();
+      // 3. the ✓ eases in at the middle of the formed line
+      setTimeout(function () {
+        fab.style.transition = "opacity .32s ease, transform .4s cubic-bezier(.3,.85,.3,1)";
+        fab.style.opacity = "1"; fab.style.transform = "translate(-50%,-50%) scale(1)";
+      }, 320);
+      setTimeout(function () { fab.style.transition = ""; fab.style.opacity = ""; fab.style.transform = ""; }, 780);
+    }, 190);
   }
-  function formAnimate() {
+  function splitHandles() {
     var s = $("tlStart"), e = $("tlEnd"), f = $("tlFill");
-    // collapse both handles + fill to the centre, instantly
+    // both handles start stacked at the centre, small — reads as the single + circle
     s.style.transition = "none"; e.style.transition = "none"; f.style.transition = "none";
-    s.style.left = "50%"; e.style.left = "50%"; f.style.left = "50%"; f.style.width = "0%";
-    void $("tlTrack").offsetWidth; // reflow so the collapse is the animation's start
-    var ease = "left .5s cubic-bezier(.34,.72,.2,1)";
+    s.style.left = "50%"; e.style.left = "50%"; s.style.opacity = "1"; e.style.opacity = "1";
+    s.style.transform = "translate(-50%,-50%) scale(.4)"; e.style.transform = "translate(-50%,-50%) scale(.4)";
+    f.style.left = "50%"; f.style.width = "0%"; f.style.opacity = "1";
+    void $("tlTrack").offsetWidth; // reflow so this is the animation's starting frame
+    var ease = "left .62s cubic-bezier(.32,.82,.28,1), transform .62s cubic-bezier(.32,.82,.28,1)";
     s.style.transition = ease; e.style.transition = ease;
-    f.style.transition = "left .5s cubic-bezier(.34,.72,.2,1), width .5s cubic-bezier(.34,.72,.2,1)";
-    renderTimeline(); // sets real positions → they slide apart, line grows
-    setTimeout(function () { s.style.transition = ""; e.style.transition = ""; f.style.transition = ""; }, 540);
+    f.style.transition = "left .62s cubic-bezier(.32,.82,.28,1), width .62s cubic-bezier(.32,.82,.28,1)";
+    renderTimeline();  // real left/width
+    s.style.transform = "translate(-50%,-50%) scale(1)"; e.style.transform = "translate(-50%,-50%) scale(1)";
+    setTimeout(function () {
+      s.style.transition = ""; e.style.transition = ""; f.style.transition = "";
+      s.style.transform = ""; e.style.transform = ""; s.style.opacity = ""; e.style.opacity = ""; f.style.opacity = "";
+    }, 700);
   }
   function saveHero() {
     var existing = recordFor(state.selected);
