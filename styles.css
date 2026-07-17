@@ -194,23 +194,51 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .tl-cap { font-size: .6rem; font-weight: 800; letter-spacing: .14em; color: var(--ink-soft); }
 .tl-time { font-size: 1.55rem; font-weight: 900; color: var(--hc); }
 
-/* record button — concentric on the line, same size as a handle, green.
-   It stays put through the animation, morphing + → ✓ in place while the two
-   handles slide out from behind it. */
+/* control cluster below the timeline: ✕ cancel · +/✓ save · ✎ notes.
+   The + starts lifted up onto the timeline line; on tap it drops into the row
+   and the two satellites slide out from it. */
+.hero-controls { position: relative; min-height: 48px; margin-top: 14px; }
+.tl-cluster { position: absolute; left: 50%; top: 50%; --fab-lift: -84px; }
+.tl-cluster > button {
+  position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50%;
+  border: 0; padding: 0; cursor: pointer; display: grid; place-items: center;
+  font-weight: 900; line-height: 1;
+}
+.recorded .tl-cluster { display: none; }
+
+/* save / record button (+ ↔ ✓) */
 .tl-fab {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 20;
-  width: 40px; height: 40px; border-radius: 50%; border: 4px solid var(--c-ok); padding: 0; cursor: pointer;
-  display: grid; place-items: center; font-weight: 900; line-height: 1; font-size: 1.25rem;
-  background: var(--c-ok); color: #fff;      /* confirm (editing): solid green ✓ */
+  z-index: 26; font-size: 1.25rem; background: var(--c-ok); color: #fff; border: 4px solid var(--c-ok);
   box-shadow: 0 4px 10px color-mix(in srgb, var(--c-ok) 45%, transparent);
-  transition: background .3s ease, color .2s ease, box-shadow .3s ease, transform .35s cubic-bezier(.3,.8,.3,1);
+  transform: translate(-50%, -50%);   /* dropped into the row (editing) */
+  transition: transform .55s cubic-bezier(.4,0,.2,1), background .3s ease, color .2s ease, box-shadow .3s ease;
 }
 .tl-fab:hover { filter: brightness(1.05); }
-.state-empty .tl-fab {              /* empty: white face, green ring, green + — like a handle */
-  background: var(--card); color: var(--c-ok); font-size: 1.55rem;
-  box-shadow: 0 3px 8px rgba(43, 51, 61, .2);
+.state-empty .tl-fab {   /* empty: white +, lifted up onto the timeline line */
+  background: var(--card); color: var(--c-ok); font-size: 1.5rem;
+  box-shadow: 0 3px 8px rgba(43,51,61,.2);
+  transform: translate(-50%, calc(-50% + var(--fab-lift)));
 }
-.recorded .tl-fab { display: none; }
+
+/* the two satellites — collapsed behind the save button, slide out when editing */
+.tl-ctl {
+  z-index: 24; font-size: 1.05rem; background: var(--card); color: var(--ink-soft);
+  border: 1px solid var(--line) !important; box-shadow: 0 3px 8px rgba(43,51,61,.14);
+  transform: translate(-50%, -50%) scale(.2); opacity: 0; pointer-events: none;
+  transition: transform .45s cubic-bezier(.34,.8,.3,1) .28s, opacity .35s ease .28s, color .15s, border-color .15s;
+}
+.tl-ctl.x { color: var(--late); }
+.tl-ctl.notes.has-note { color: var(--brand); border-color: var(--brand) !important; }
+#heroInput:not(.state-empty):not(.recorded) .tl-ctl { pointer-events: auto; opacity: 1; }
+#heroInput:not(.state-empty):not(.recorded) .tl-ctl.x { transform: translate(calc(-50% - 60px), -50%) scale(1); }
+#heroInput:not(.state-empty):not(.recorded) .tl-ctl.notes { transform: translate(calc(-50% + 60px), -50%) scale(1); }
+.tl-ctl:hover { filter: brightness(.98); }
+
+.notes-area {
+  font: inherit; color: var(--ink); background: var(--bg1); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: 11px 13px; width: 100%; resize: vertical; margin-bottom: 4px;
+}
+.notes-area:focus { outline: none; border-color: var(--brand); }
 
 /* the whole timeline unfolds from the centre button when a week is armed.
    these transitions only apply while .forming is on, so dragging stays instant
@@ -237,15 +265,9 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   .tl-handle { width: 44px; height: 44px; }
 }
 
-.notes-input {
-  font: inherit; font-weight: 600; color: var(--ink); background: var(--bg1);
-  border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 11px 14px;
-  width: 100%; margin-top: 12px;
-}
-.notes-input::placeholder { color: var(--muted); }
-.notes-input:focus { outline: none; border-color: var(--brand); }
 
-.hero-actions { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.hero-actions { display: none; align-items: center; justify-content: center; gap: 10px; }
+.recorded .hero-actions { display: flex; }
 
 .btn {
   font: inherit; font-weight: 800; border-radius: 11px; padding: 11px 18px;

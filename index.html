@@ -47,7 +47,6 @@
               <span class="tl-flag"><span class="tl-cap">END</span><span class="tl-time" id="endValue">—</span></span>
               <span class="tl-clock"><span class="tl-hand hour"></span><span class="tl-hand minute"></span><span class="tl-hub"></span></span>
             </button>
-            <button type="button" class="tl-fab" id="recordFab" aria-label="Record this week">+</button>
           </div>
           <div class="tl-axis">
             <span>1:00</span><span>1:30</span><span>2:00</span><span>2:30</span><span>3:00</span>
@@ -56,14 +55,23 @@
 
         <input type="hidden" id="start" />
         <input type="hidden" id="end" />
+        <input type="hidden" id="notes" />
 
         <p class="recorded-verdict" id="recVerdict" hidden></p>
         <p class="recorded-notes" id="recNotes" hidden></p>
 
-        <input type="text" id="notes" class="notes-input" placeholder="Add a note (optional)" maxlength="140" />
-        <div class="hero-actions">
-          <button type="button" class="btn ghost big" id="editBtn" hidden>Edit</button>
-          <button type="button" class="btn ghost danger" id="clearBtn" hidden>Remove</button>
+        <div class="hero-controls">
+          <!-- the + starts up on the timeline; on tap it drops here and the two
+               satellites (cancel · notes) slide out from it -->
+          <div class="tl-cluster">
+            <button type="button" class="tl-ctl x" id="cancelBtn" aria-label="Cancel">✕</button>
+            <button type="button" class="tl-fab" id="recordFab" aria-label="Record this week">+</button>
+            <button type="button" class="tl-ctl notes" id="notesBtn" aria-label="Add a note">✎</button>
+          </div>
+          <div class="hero-actions">
+            <button type="button" class="btn ghost big" id="editBtn" hidden>Edit</button>
+            <button type="button" class="btn ghost danger" id="clearBtn" hidden>Remove</button>
+          </div>
         </div>
       </form>
     </section>
@@ -160,6 +168,20 @@
         <span class="spacer"></span>
         <button type="button" class="btn ghost" id="cfgCancelBtn">Close</button>
         <button type="button" class="btn primary" id="cfgSaveBtn">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Notes dialog -->
+  <dialog id="notesDialog" class="dialog">
+    <form method="dialog" class="dialog-inner">
+      <h2>Note</h2>
+      <p class="muted small">A short note for this week (optional).</p>
+      <textarea id="notesText" class="notes-area" rows="3" maxlength="140" placeholder="e.g. long testimony meeting"></textarea>
+      <div class="form-actions">
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="notesCancelBtn">Cancel</button>
+        <button type="button" class="btn primary" id="notesSaveBtn">Done</button>
       </div>
     </form>
   </dialog>

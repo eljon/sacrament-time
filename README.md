@@ -34,10 +34,12 @@ into the end colour. The handles
 are keyboard-friendly too: focus one and use **← / →** (hold **Shift** for 5-minute
 jumps, **Home/End** for the extremes).
 
-Tap the round **✓** button at the middle of the line to save. The timeline then
-stays put as the record itself — the cream track lane, axis, and drag hint drop
-away, leaving just the coloured line and its handles, plus a one-line verdict.
-**Edit** makes it draggable again; **Remove** clears the week.
+When you tap the **+**, it drops just below the timeline and two round buttons
+slide out from it: **✕** (cancel) and **✎** (notes — opens a small dialog to type
+a note for the week). Tap the round **✓** to save. The timeline then stays put as
+the record itself — the cream track lane, axis, and hint drop away, leaving just
+the coloured line and its handles, plus a one-line verdict. **Edit** makes it
+draggable again; **Remove** clears the week.
 
 ---
 

@@ -240,14 +240,12 @@
     setHandlesInteractive(isEditing);
 
     var fab = $("recordFab");
-    fab.hidden = isRecorded;
     fab.textContent = isEmpty ? "+" : "✓";
     fab.setAttribute("aria-label", isEmpty ? "Record this week" : "Save");
+    $("notesBtn").classList.toggle("has-note", !!$("notes").value);
 
-    $("notes").hidden = !isEditing;
     $("editBtn").hidden = !isRecorded;
-    $("clearBtn").hidden = isEmpty;
-    $("clearBtn").textContent = (!rec && isEditing) ? "Cancel" : "Remove";
+    $("clearBtn").hidden = !isRecorded;
 
     if (isRecorded) {
       $("recVerdict").hidden = false;
@@ -272,6 +270,29 @@
     void tl.offsetWidth;             // make sure they're live before the state flips
     renderHeroBody();                // drops .state-empty → everything animates out from centre
     setTimeout(function () { tl.classList.remove("forming"); }, 840);
+  }
+  function cancelEdit() {
+    if (recordFor(state.selected)) state.heroMode = "auto"; // back to the recorded view
+    else state.armed = false;                                // discard a not-yet-saved week
+    renderHeroBody();
+  }
+  function openNotesModal() {
+    $("notesText").value = $("notes").value;
+    $("notesDialog").showModal();
+    setTimeout(function () { $("notesText").focus(); }, 30);
+  }
+  function commitNote() {
+    $("notes").value = $("notesText").value.trim();
+    $("notesBtn").classList.toggle("has-note", !!$("notes").value);
+    $("notesDialog").close();
+  }
+  // lift the + so it sits exactly on the timeline line in the empty state
+  function positionFab() {
+    var track = $("tlTrack"), cluster = document.querySelector(".tl-cluster");
+    if (!track || !cluster) return;
+    var tr = track.getBoundingClientRect(), cr = cluster.getBoundingClientRect();
+    if (!tr.height) return;
+    cluster.style.setProperty("--fab-lift", ((tr.top + tr.height / 2) - cr.top) + "px");
   }
   function saveHero() {
     var existing = recordFor(state.selected);
@@ -715,6 +736,11 @@
     document.addEventListener("pointermove", function (e) { if (state.cf.dragging) cfMove(e); });
     document.addEventListener("pointerup", function () { if (state.cf.dragging) cfUp(); });
     document.addEventListener("pointercancel", function () { if (state.cf.dragging) cfUp(); });
+    $("notesBtn").addEventListener("click", openNotesModal);
+    $("cancelBtn").addEventListener("click", cancelEdit);
+    $("notesSaveBtn").addEventListener("click", commitNote);
+    $("notesCancelBtn").addEventListener("click", function () { $("notesDialog").close(); });
+    window.addEventListener("resize", positionFab);
     $("editBtn").addEventListener("click", function () { var r = recordFor(state.selected); state.heroMode = "edit"; if (r) $("notes").value = r.notes || ""; renderHeroBody(); });
     $("clearBtn").addEventListener("click", function () {
       var r = recordFor(state.selected);
@@ -728,6 +754,8 @@
     $("cfgCancelBtn").addEventListener("click", function () { $("settingsDialog").close(); });
 
     renderAll();
+    positionFab();
+    setTimeout(positionFab, 120); // re-measure once fonts/layout settle
     loadRecords().then(renderAll).catch(function (err) { toast("Could not load: " + err.message); renderAll(); });
   }
 
