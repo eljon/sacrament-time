@@ -125,17 +125,40 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   border-radius: 0 0 3px 3px;
   background: linear-gradient(90deg, var(--accent), var(--brand));
 }
-.week-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
-.nav-arrow {
-  border: 1px solid var(--line); background: var(--card); color: var(--brand);
-  width: 42px; height: 42px; flex: 0 0 auto; border-radius: 12px; font-size: 1.4rem; font-weight: 800;
-  line-height: 1; cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+.week-nav { margin-bottom: 14px; }
+
+/* Cover Flow calendar picker */
+.coverflow { position: relative; height: 104px; perspective: 720px; overflow: hidden; }
+.cf-track { position: absolute; inset: 0; transform-style: preserve-3d; }
+.cal {
+  position: absolute; left: 50%; top: 50%; width: 62px; height: 74px;
+  margin-left: -31px; margin-top: -37px; padding: 0; border: 0; cursor: pointer;
+  background: var(--card); border-radius: 13px; overflow: hidden;
+  display: flex; flex-direction: column; transform-origin: 50% 50%;
+  box-shadow: 0 6px 16px rgba(43, 51, 61, .18);
+  transition: transform .46s cubic-bezier(.26,.72,.24,1), opacity .34s ease, box-shadow .3s ease;
+  will-change: transform, opacity; backface-visibility: hidden;
 }
+.cal-top { background: var(--accent); color: #fff; font-size: .56rem; font-weight: 800; letter-spacing: .1em; text-align: center; padding: 3px 0 2px; }
+.cal-day { flex: 1; display: grid; place-items: center; font-size: 1.55rem; font-weight: 900; color: var(--ink); }
+.cal-dot { position: absolute; left: 50%; bottom: 5px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: transparent; }
+.cal.is-center { box-shadow: 0 12px 26px rgba(43, 51, 61, .3); }
+.cal.is-center .cal-day { color: var(--brand); }
+
+.nav-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 60;
+  border: 1px solid var(--line); background: color-mix(in srgb, var(--card) 82%, transparent);
+  backdrop-filter: blur(3px); color: var(--brand);
+  width: 38px; height: 38px; border-radius: 11px; font-size: 1.3rem; font-weight: 800;
+  line-height: 1; cursor: pointer; transition: background .15s, color .15s, border-color .15s, opacity .15s;
+}
+.nav-arrow.left { left: 2px; }
+.nav-arrow.right { right: 2px; }
 .nav-arrow:hover { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
-.nav-arrow:disabled { opacity: .35; cursor: not-allowed; background: var(--card); color: var(--brand); border-color: var(--line); }
-.week-label { text-align: center; line-height: 1.2; }
-.week-date { display: block; font-size: 1.28rem; font-weight: 800; }
-.week-eyebrow { display: block; font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--brand); margin-top: 2px; }
+.nav-arrow:disabled { opacity: .28; cursor: not-allowed; background: color-mix(in srgb, var(--card) 82%, transparent); color: var(--brand); border-color: var(--line); }
+.week-caption { text-align: center; font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); min-height: 1em; margin-top: 4px; }
+
+@media (prefers-reduced-motion: reduce) { .cal { transition: opacity .2s ease; } }
 
 /* the timeline slider — the time lives on each handle ("the picker") */
 .timeline { margin-top: 6px; padding: 62px 22px 0; }
@@ -210,7 +233,8 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 /* recorded state: the timeline stays, but reads as a record, not a control */
 .recorded .tl-track { background: transparent; border-color: transparent; pointer-events: none; }
 .recorded .tl-handle { cursor: default; box-shadow: 0 2px 5px rgba(43,51,61,.16); }
-.recorded .tl-help { display: none; }
+.recorded .tl-help,
+.recorded .tl-axis { display: none; }
 .recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; margin-top: 18px; }
 .recorded-notes { text-align: center; color: var(--ink-soft); font-weight: 600; margin-top: 4px; font-style: italic; }
 

@@ -16,9 +16,11 @@ in your browser (`localStorage`).
 
 ## Using it
 
-The entry card sits at the top. Use the **‹ ›** arrows to move between Sundays
-(no calendar to fuss with) — back for previous weeks, forward to return toward
-this Sunday.
+The entry card sits at the top. Pick a Sunday from the **Cover Flow** of
+calendar cards — the selected week sits centred and forward-facing, previous
+weeks fan back to the left. Tap a card, swipe, or use the **‹ ›** arrows to move
+(you can't go past this Sunday). Logged weeks show a small status dot coloured by
+how on-time they were.
 
 Set the times on the **meeting timeline** — a line running 1:00 → 3:00 PM with
 dashed goal marks at 1:30 and 2:30. Drag the two handles (start and end) in

@@ -186,7 +186,6 @@
   function shortDate(s) { var d = parseYMD(s); return d ? MON[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear() : s; }
   function weekdayDate(s) { var d = parseYMD(s); return d ? MON[d.getMonth()] + " " + d.getDate() + " <span class='yr'>" + d.getFullYear() + "</span>" : s; }
   function mostRecentSunday() { var d = new Date(); d.setDate(d.getDate() - d.getDay()); return ymd(d); }
-  function isSameOrAfter(a, b) { return a >= b; } // yyyy-mm-dd strings compare lexically
 
   // ---- Rendering ------------------------------------------------------------
   var $ = function (id) { return document.getElementById(id); };
@@ -213,10 +212,8 @@
     var rec = recordFor(sel);
     var today = mostRecentSunday();
 
-    var d = parseYMD(sel);
-    $("weekDate").textContent = MON[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
-    $("weekEyebrow").textContent = sel === today ? "This Sunday" : "Sunday";
-    $("nextWeek").disabled = isSameOrAfter(sel, today);
+    renderCoverflow();
+    $("weekCaption").textContent = sel === today ? "This Sunday" : "";
 
     var editing = state.heroMode === "edit" || (state.heroMode === "auto" && !rec);
     state.editing = editing;
@@ -354,6 +351,70 @@
   // ---- Hero interactions ----------------------------------------------------
   function goToWeek(date) { state.selected = date; state.heroMode = "auto"; renderHero(); }
   function scrollToHero() { document.querySelector(".hero").scrollIntoView({ behavior: "smooth", block: "start" }); }
+
+  // ---- Cover Flow date picker -----------------------------------------------
+  var CF_RANGE = 104;   // Sundays of history to make available (~2 years)
+  var CF_WINDOW = 4;    // how many cards fan out on each side of centre
+  function buildCoverflow() {
+    var track = $("cfTrack"); track.innerHTML = "";
+    state.sundays = []; state.cardEls = {};
+    var today = mostRecentSunday();
+    for (var i = CF_RANGE; i >= 0; i--) {         // oldest → today (ascending)
+      var dt = addDays(today, -7 * i);
+      state.sundays.push(dt);
+      var el = calCard(dt);
+      track.appendChild(el);
+      state.cardEls[dt] = el;
+    }
+  }
+  function calCard(dateStr) {
+    var d = parseYMD(dateStr);
+    var el = document.createElement("button");
+    el.type = "button"; el.className = "cal"; el.setAttribute("data-date", dateStr);
+    el.setAttribute("aria-label", MON[d.getMonth()] + " " + d.getDate());
+    el.innerHTML = '<span class="cal-top">' + MON[d.getMonth()].toUpperCase() + '</span>' +
+      '<span class="cal-day">' + d.getDate() + '</span><span class="cal-dot"></span>';
+    el.addEventListener("click", function () { if (!state.cfMoved) goToWeek(dateStr); });
+    return el;
+  }
+  function renderCoverflow() {
+    if (!state.sundays) return;
+    var idx = state.sundays.indexOf(state.selected);
+    if (idx < 0) return;
+    $("prevWeek").disabled = idx <= 0;
+    $("nextWeek").disabled = idx >= state.sundays.length - 1;
+    for (var i = 0; i < state.sundays.length; i++) {
+      positionCard(state.cardEls[state.sundays[i]], i - idx, state.sundays[i]);
+    }
+  }
+  function positionCard(el, o, dateStr) {
+    var abso = Math.abs(o), dir = o < 0 ? -1 : 1;
+    if (o === 0) {
+      el.style.transform = "translateX(0) rotateY(0deg) scale(1)";
+      el.style.opacity = "1"; el.style.zIndex = "100"; el.style.pointerEvents = "auto";
+      el.classList.add("is-center");
+    } else if (abso > CF_WINDOW) {
+      el.style.transform = "translateX(" + (dir * 190) + "px) rotateY(" + (-dir * 58) + "deg) scale(.7)";
+      el.style.opacity = "0"; el.style.zIndex = "0"; el.style.pointerEvents = "none";
+      el.classList.remove("is-center");
+    } else {
+      var x = dir * (46 + (abso - 1) * 24);
+      el.style.transform = "translateX(" + x + "px) rotateY(" + (-dir * 54) + "deg) scale(.86)";
+      el.style.opacity = String(Math.max(0, 1 - abso * 0.18));
+      el.style.zIndex = String(100 - abso); el.style.pointerEvents = "auto";
+      el.classList.remove("is-center");
+    }
+    // status dot for logged weeks
+    var dot = el.querySelector(".cal-dot");
+    var rec = recordFor(dateStr);
+    if (rec) { var a = analyze(rec); dot.style.background = lateColor(Math.max(a.startDev || 0, a.endDev || 0)); }
+    else dot.style.background = "transparent";
+  }
+  function stepWeek(dir) {
+    if (!state.sundays) return;
+    var ni = state.sundays.indexOf(state.selected) + dir;
+    if (ni >= 0 && ni < state.sundays.length) goToWeek(state.sundays[ni]);
+  }
 
   // ---- Timeline slider ------------------------------------------------------
   // Continuous colour for how late an end is, stepping per minute along
@@ -553,17 +614,25 @@
       if (mq.addEventListener) mq.addEventListener("change", onScheme); else if (mq.addListener) mq.addListener(onScheme);
     }
     state.selected = mostRecentSunday();
+    buildCoverflow();
     $("heroInput").addEventListener("submit", onSubmit);
     $("tlTrack").addEventListener("pointerdown", onTimelinePointerDown);
     document.addEventListener("pointermove", function (e) { if (state.dragging) { var m = minFromClientX(e.clientX); if (m != null) setHandle(state.dragging, m); } });
     document.addEventListener("pointerup", function () { state.dragging = null; });
     $("tlStart").addEventListener("keydown", function (e) { onTimelineKey("start", e); });
     $("tlEnd").addEventListener("keydown", function (e) { onTimelineKey("end", e); });
-    $("prevWeek").addEventListener("click", function () { goToWeek(addDays(state.selected, -7)); });
-    $("nextWeek").addEventListener("click", function () {
-      var next = addDays(state.selected, 7);
-      if (!isSameOrAfter(state.selected, mostRecentSunday())) goToWeek(next);
+    $("prevWeek").addEventListener("click", function () { stepWeek(-1); });
+    $("nextWeek").addEventListener("click", function () { stepWeek(1); });
+    // swipe the cover flow (drag right → older, left → newer)
+    var cf = $("coverflow"), cfStart = null;
+    cf.addEventListener("pointerdown", function (e) { cfStart = e.clientX; state.cfMoved = false; });
+    cf.addEventListener("pointermove", function (e) { if (cfStart != null && Math.abs(e.clientX - cfStart) > 8) state.cfMoved = true; });
+    cf.addEventListener("pointerup", function (e) {
+      if (cfStart == null) return;
+      var dx = e.clientX - cfStart; cfStart = null;
+      if (dx <= -40) stepWeek(1); else if (dx >= 40) stepWeek(-1);
     });
+    cf.addEventListener("pointerleave", function () { cfStart = null; });
     $("editBtn").addEventListener("click", function () { state.heroMode = "edit"; renderHero(); });
     $("cancelEditBtn").addEventListener("click", function () { state.heroMode = "auto"; renderHero(); });
     $("clearBtn").addEventListener("click", function () { var r = recordFor(state.selected); if (r) confirmDelete(r); });

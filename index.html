@@ -24,12 +24,12 @@
     <!-- HERO: this week's entry -->
     <section class="card hero" aria-label="Log this week">
       <div class="week-nav">
-        <button id="prevWeek" class="nav-arrow" type="button" aria-label="Previous Sunday">‹</button>
-        <div class="week-label">
-          <span class="week-date" id="weekDate">—</span>
-          <span class="week-eyebrow" id="weekEyebrow">Sunday</span>
+        <div class="coverflow" id="coverflow">
+          <div class="cf-track" id="cfTrack"></div>
+          <button id="prevWeek" class="nav-arrow left" type="button" aria-label="Previous Sunday">‹</button>
+          <button id="nextWeek" class="nav-arrow right" type="button" aria-label="Next Sunday">›</button>
         </div>
-        <button id="nextWeek" class="nav-arrow" type="button" aria-label="Next Sunday">›</button>
+        <p class="week-caption" id="weekCaption"></p>
       </div>
 
       <!-- the meeting timeline is always shown; a "recorded" class flips it
