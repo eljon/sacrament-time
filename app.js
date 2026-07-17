@@ -37,6 +37,7 @@
   var state = {
     records: [], loading: false, selected: null, heroMode: "auto", slider: null, dragging: null,
     cf: { pos: 0, vel: 0, target: null, dragging: false, raf: null, startX: 0, startPos: 0, lastX: 0, vpx: 0, moved: false },
+    cfCenter: null,
   };
 
   // ---- Time helpers ---------------------------------------------------------
@@ -214,7 +215,7 @@
     // snap the cover flow to the selected week, then render the body
     if (state.sundays) {
       var idx = state.sundays.indexOf(state.selected);
-      if (idx >= 0) { state.cf.target = null; state.cf.vel = 0; state.cf.pos = idx; cfStopRaf(); }
+      if (idx >= 0) { state.cf.target = null; state.cf.vel = 0; state.cf.pos = idx; state.cfCenter = idx; cfStopRaf(); }
       cfLayout();
     }
     renderHeroBody();
@@ -405,7 +406,6 @@
     for (var i = 0; i < state.sundays.length; i++) {
       applyCard(state.cardEls[state.sundays[i]], i - pos, i === center, state.sundays[i]);
     }
-    $("weekCaption").textContent = state.sundays[center] === mostRecentSunday() ? "This Sunday" : "";
   }
   function applyCard(el, o, isCenter, dateStr) {
     var ao = Math.abs(o), s = o < 0 ? -1 : 1;
@@ -440,17 +440,22 @@
     if (cf.dragging) { cf.raf = null; return; }
     if (cf.target != null) {
       cf.pos += (cf.target - cf.pos) * 0.2;
-      if (Math.abs(cf.target - cf.pos) < 0.003) { cf.pos = cf.target; cf.target = null; cf.vel = 0; cfLayout(); cfFinalize(); cf.raf = null; return; }
+      if (Math.abs(cf.target - cf.pos) < 0.003) { cf.pos = cf.target; cf.target = null; cf.vel = 0; cfLayout(); cfSyncCenter(); cf.raf = null; return; }
     } else {
       cf.pos += cf.vel; cf.vel *= CF_FRICTION;
       if (cf.pos < 0) { cf.pos = 0; cf.vel = 0; } else if (cf.pos > cfMax()) { cf.pos = cfMax(); cf.vel = 0; }
       if (Math.abs(cf.vel) < 0.02) cf.target = clampPos(Math.round(cf.pos)); // begin snap
     }
     cfLayout();
+    cfSyncCenter();
     cf.raf = requestAnimationFrame(cfTick);
   }
-  function cfFinalize() {
+  // Push the centred week into the hero as soon as it changes, so the timeline
+  // updates live while scrolling — not only after the flow settles.
+  function cfSyncCenter() {
     var ci = clampPos(Math.round(state.cf.pos));
+    if (ci === state.cfCenter) return;
+    state.cfCenter = ci;
     state.selected = state.sundays[ci];
     renderHeroBody();
   }
@@ -469,13 +474,14 @@
     cf.pos = clampPos(cf.startPos - dx / CF_STEP);
     cf.vpx = e.clientX - cf.lastX; cf.lastX = e.clientX;
     cfLayout();
+    cfSyncCenter();
   }
   function cfUp() {
     var cf = state.cf; if (!cf.dragging) return;
     cf.dragging = false;
     if (!cf.moved) { cf.target = clampPos(Math.round(cf.pos)); cfEnsureRaf(); return; }
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) { cf.pos = clampPos(Math.round(cf.pos)); cfLayout(); cfFinalize(); return; }
+    if (reduce) { cf.pos = clampPos(Math.round(cf.pos)); cfLayout(); cfSyncCenter(); return; }
     cf.vel = -cf.vpx / CF_STEP;   // carry the flick into momentum
     cfEnsureRaf();
   }

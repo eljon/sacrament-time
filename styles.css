@@ -128,7 +128,8 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .week-nav { margin-bottom: 14px; }
 
 /* Cover Flow calendar picker */
-.coverflow { position: relative; height: 104px; perspective: 720px; overflow: hidden; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+/* touch-action: none — horizontal drag never triggers vertical page scroll */
+.coverflow { position: relative; height: 104px; perspective: 720px; overflow: hidden; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
 .coverflow:active { cursor: grabbing; }
 .cf-track { position: absolute; inset: 0; transform-style: preserve-3d; }
 .cal {
@@ -145,8 +146,6 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .cal-dot { position: absolute; left: 50%; bottom: 5px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: transparent; }
 .cal.is-center { box-shadow: 0 12px 26px rgba(43, 51, 61, .3); }
 .cal.is-center .cal-day { color: var(--brand); }
-
-.week-caption { text-align: center; font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); min-height: 1em; margin-top: 4px; }
 
 /* the timeline slider — the time lives on each handle ("the picker") */
 .timeline { margin-top: 6px; padding: 62px 22px 0; }
