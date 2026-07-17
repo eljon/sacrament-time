@@ -356,14 +356,47 @@
   function scrollToHero() { document.querySelector(".hero").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
   // ---- Timeline slider ------------------------------------------------------
-  // Colour for how late an end is: on time → green, <3 min → yellow,
-  // 3-7 min → orange, beyond → red.
-  function lateColor(dev) {
-    if (dev == null || dev <= 0) return "var(--c-ok)";
-    if (dev < 3) return "var(--c-yellow)";
-    if (dev <= 7) return "var(--c-orange)";
-    return "var(--c-red)";
+  // Continuous colour for how late an end is: green when on time, easing a
+  // little further toward red with every minute late, through the gold/orange
+  // anchors so the ramp stays clean instead of muddy. Anchors are read from the
+  // CSS variables so the scale follows the light/dark theme.
+  var STOPS = null;
+  function parseColor(str) {
+    str = (str || "").trim();
+    if (str.charAt(0) === "#") {
+      var h = str.slice(1);
+      if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+      var n = parseInt(h, 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+    var m = str.match(/(\d+)\D+(\d+)\D+(\d+)/);
+    return m ? [+m[1], +m[2], +m[3]] : [0, 0, 0];
   }
+  function loadStops() {
+    var cs = getComputedStyle(document.documentElement);
+    // minutes-late anchor → colour
+    STOPS = [
+      { m: 0, c: parseColor(cs.getPropertyValue("--c-ok")) },
+      { m: 3, c: parseColor(cs.getPropertyValue("--c-yellow")) },
+      { m: 6, c: parseColor(cs.getPropertyValue("--c-orange")) },
+      { m: 10, c: parseColor(cs.getPropertyValue("--c-red")) },
+    ];
+  }
+  function lateColor(dev) {
+    if (!STOPS) loadStops();
+    if (dev == null || dev <= 0) return rgb(STOPS[0].c);
+    for (var i = 1; i < STOPS.length; i++) {
+      if (dev <= STOPS[i].m) {
+        var t = (dev - STOPS[i - 1].m) / (STOPS[i].m - STOPS[i - 1].m);
+        return rgb(mixColor(STOPS[i - 1].c, STOPS[i].c, t));
+      }
+    }
+    return rgb(STOPS[STOPS.length - 1].c);
+  }
+  function mixColor(a, b, t) {
+    return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)];
+  }
+  function rgb(c) { return "rgb(" + c[0] + ", " + c[1] + ", " + c[2] + ")"; }
   // rotate a handle's clock hands to the time it represents
   function setClock(el, minutes) {
     var hh = Math.floor(minutes / 60), mm = minutes % 60;
@@ -512,6 +545,12 @@
 
   // ---- Wire up --------------------------------------------------------------
   function init() {
+    loadStops();
+    if (window.matchMedia) {
+      var mq = window.matchMedia("(prefers-color-scheme: dark)");
+      var onScheme = function () { loadStops(); if (state.slider) renderTimeline(); };
+      if (mq.addEventListener) mq.addEventListener("change", onScheme); else if (mq.addListener) mq.addListener(onScheme);
+    }
     state.selected = mostRecentSunday();
     $("heroInput").addEventListener("submit", onSubmit);
     $("tlTrack").addEventListener("pointerdown", onTimelinePointerDown);
