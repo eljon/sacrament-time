@@ -356,11 +356,10 @@
   function scrollToHero() { document.querySelector(".hero").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
   // ---- Timeline slider ------------------------------------------------------
-  // Continuous colour for how late an end is: green when on time, easing to a
-  // yellow-orange at LATE_MID minutes, then on to full red at LATE_FULL minutes.
-  // Anchors are read from the CSS variables so the scale follows the theme.
-  var LATE_MID = 5, LATE_FULL = 10;
-  var GREEN = null, AMBER = null, RED = null;
+  // Continuous colour for how late an end is, stepping per minute along
+  // green → yellow (3 min) → orange (6 min) → red (10 min, then held). Anchors
+  // are read from the CSS variables so the scale follows the light/dark theme.
+  var STOPS = null;
   function parseColor(str) {
     str = (str || "").trim();
     if (str.charAt(0) === "#") {
@@ -374,16 +373,23 @@
   }
   function loadStops() {
     var cs = getComputedStyle(document.documentElement);
-    GREEN = parseColor(cs.getPropertyValue("--c-ok"));
-    AMBER = parseColor(cs.getPropertyValue("--c-amber"));
-    RED = parseColor(cs.getPropertyValue("--c-red"));
+    STOPS = [
+      { m: 0, c: parseColor(cs.getPropertyValue("--c-ok")) },
+      { m: 3, c: parseColor(cs.getPropertyValue("--c-yellow")) },
+      { m: 6, c: parseColor(cs.getPropertyValue("--c-orange")) },
+      { m: 10, c: parseColor(cs.getPropertyValue("--c-red")) },
+    ];
   }
   function lateColor(dev) {
-    if (!GREEN) loadStops();
-    if (dev == null || dev <= 0) return rgb(GREEN);
-    if (dev >= LATE_FULL) return rgb(RED);
-    if (dev <= LATE_MID) return rgb(mixColor(GREEN, AMBER, dev / LATE_MID));
-    return rgb(mixColor(AMBER, RED, (dev - LATE_MID) / (LATE_FULL - LATE_MID)));
+    if (!STOPS) loadStops();
+    if (dev == null || dev <= 0) return rgb(STOPS[0].c);
+    for (var i = 1; i < STOPS.length; i++) {
+      if (dev <= STOPS[i].m) {
+        var t = (dev - STOPS[i - 1].m) / (STOPS[i].m - STOPS[i - 1].m);
+        return rgb(mixColor(STOPS[i - 1].c, STOPS[i].c, t));
+      }
+    }
+    return rgb(STOPS[STOPS.length - 1].c);
   }
   function mixColor(a, b, t) {
     return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)];
