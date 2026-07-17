@@ -240,7 +240,8 @@
     setHandlesInteractive(isEditing);
 
     var fab = $("recordFab");
-    $("fabGlyph").textContent = isEmpty ? "+" : "✓";
+    fab.classList.toggle("as-check", !isEmpty);   // ✓ when editing, drawn + otherwise
+    $("fabGlyph").textContent = isEmpty ? "" : "✓";
     fab.setAttribute("aria-label", isEmpty ? "Record this week" : "Save");
     $("notesBtn").classList.toggle("has-note", !!$("notes").value);
 
@@ -267,7 +268,7 @@
     fab.classList.remove("loading");
     if (prefersReduced()) return;
     fab.classList.add("settling");
-    setTimeout(function () { fab.classList.remove("settling"); }, 740);
+    setTimeout(function () { fab.classList.remove("settling"); }, 1020);
   }
 
   // tap the record button on an empty week → the whole timeline (lane, ticks,

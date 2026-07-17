@@ -215,33 +215,40 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 }
 .tl-fab:hover { filter: brightness(1.05); }
 
-/* loading animation: a spinning clock that merges into the + */
-.fab-glyph { transition: opacity .15s ease; }
-.tl-fab.loading .fab-glyph, .tl-fab.settling .fab-glyph { opacity: 0; }
-.fab-anim { display: none; position: absolute; inset: 0; }
-.tl-fab.loading .fab-anim, .tl-fab.settling .fab-anim { display: block; }
-.tl-fab.settling .fab-anim { animation: fabSettle .72s forwards; }
-.fab-clock { position: absolute; inset: 0; }
-.tl-fab.settling .fab-clock { opacity: 0; transition: opacity .16s ease; }
+/* the button's glyph is one of three layers, all the same footprint:
+   the drawn + (resting AND the animation target), the ✓ text, or the clock. */
+.fab-glyph, .fab-clock, .fab-plus { position: absolute; inset: 0; }
+.fab-glyph { display: grid; place-items: center; opacity: 0; transition: opacity .15s ease; }  /* ✓ */
+.tl-fab.as-check .fab-glyph { opacity: 1; }
+.fab-plus { opacity: 1; transition: opacity .16s ease; }                                        /* + */
+.tl-fab.as-check .fab-plus { opacity: 0; }
+.fab-plus::before, .fab-plus::after { content: ""; position: absolute; left: 50%; top: 50%; background: currentColor; border-radius: 2px; transform: translate(-50%, -50%); }
+.fab-plus::before { width: 3px; height: 17px; }
+.fab-plus::after { width: 17px; height: 3px; }
+.fab-clock { opacity: 0; }
 .fab-hand { position: absolute; left: 50%; bottom: 50%; background: currentColor; border-radius: 2px; transform-origin: 50% 100%; }
 .fab-hand.hour { width: 3px; height: 8px; margin-left: -1.5px; }
 .fab-hand.minute { width: 2px; height: 12px; margin-left: -1px; }
+
+/* loading: clock spins in place, + and ✓ hidden */
+.tl-fab.loading .fab-clock { opacity: 1; }
+.tl-fab.loading .fab-plus, .tl-fab.loading .fab-glyph { opacity: 0; }
 .tl-fab.loading .fab-hand.hour { animation: fabHand 5s linear infinite; }
 .tl-fab.loading .fab-hand.minute { animation: fabHand 1.2s linear infinite; }
-.fab-plus { position: absolute; inset: 0; opacity: 0; }
-.tl-fab.settling .fab-plus { opacity: 1; transition: opacity .16s ease; }
-.fab-plus::before, .fab-plus::after { content: ""; position: absolute; left: 50%; top: 50%; background: currentColor; border-radius: 2px; transform: translate(-50%, -50%); }
-.fab-plus::before { width: 3px; height: 18px; }
-.fab-plus::after { width: 18px; height: 3px; }
+/* settling: clock fades out, the + fades in and spins to a stop (same + that rests) */
+.tl-fab.settling .fab-clock { opacity: 0; }
+.tl-fab.settling .fab-glyph { opacity: 0; }
+.tl-fab.settling .fab-plus { opacity: 1; animation: fabSettle 1s forwards; }
+
 @keyframes fabHand { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 @keyframes fabSettle {
-  0%   { transform: rotate(0deg);    animation-timing-function: linear; }         /* fast constant spin… */
-  42%  { transform: rotate(720deg);  animation-timing-function: cubic-bezier(.15,.7,.25,1); } /* …for ~0.3s */
-  100% { transform: rotate(1080deg); }                                            /* then decelerate to a stop, upright */
+  0%   { transform: rotate(0deg);   animation-timing-function: linear; }          /* steady spin… */
+  30%  { transform: rotate(260deg); animation-timing-function: cubic-bezier(.2,.7,.3,1); } /* …for ~0.3s */
+  100% { transform: rotate(720deg); }                                             /* then decelerate to a stop, upright */
 }
 @media (prefers-reduced-motion: reduce) {
   .tl-fab.loading .fab-hand { animation: none; }
-  .tl-fab.settling .fab-anim { animation: none; }
+  .tl-fab.settling .fab-plus { animation: none; }
 }
 
 .state-empty .tl-fab {   /* empty: white +, lifted up onto the timeline line */
