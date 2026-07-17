@@ -1,0 +1,475 @@
+/* Sacrament Time Tracker — calm edition
+   Palette & language inspired by the Sunday Attendance app:
+   warm cream ground, teal primary, terracotta accents, quiet type. */
+:root {
+  --bg1: #efe8dc;
+  --bg2: #e8e0d2;
+  --ink: #2b333d;
+  --ink-soft: #5f6b76;
+  --muted: #9a958b;
+  --card: #ffffff;
+  --line: #e7dfd0;
+  --line-soft: #eee8dc;
+  --brand: #1c6b86;
+  --brand-2: #0f5674;
+  --brand-ink: #ffffff;
+  --accent: #b5612f;      /* terracotta — small labels only */
+  --ok: #2f8f6d;
+  --ok-bg: #e9f2ec;
+  --ok-line: #cfe6da;
+  --late: #c0563f;
+  --late-bg: #f8ece5;
+  --late-line: #ecd3c6;
+  --partial: #cf8a3c;
+  /* lateness scale: green → yellow (3 min) → orange (6 min) → red (10 min) */
+  --c-ok: #2f8f6d;
+  --c-yellow: #f1c40f;
+  --c-orange: #e8791a;
+  --c-red: #c0563f;
+  --tint: #eef4f6;        /* recorded / selected tint */
+  --tint-line: #d9e6ea;
+  --shadow: 0 1px 2px rgba(43, 51, 61, .05), 0 10px 24px rgba(43, 51, 61, .06);
+  --radius: 20px;
+  --radius-sm: 13px;
+  --font: "Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg1: #201d19;
+    --bg2: #1a1815;
+    --ink: #ece7dd;
+    --ink-soft: #b3ab9d;
+    --muted: #837c6f;
+    --card: #262320;
+    --line: #38332c;
+    --line-soft: #322e28;
+    --brand: #4fa3bd;
+    --brand-2: #3d90aa;
+    --brand-ink: #10242b;
+    --accent: #d98a54;
+    --ok: #56b389;
+    --ok-bg: #172c23;
+    --ok-line: #274a3a;
+    --late: #db7a5f;
+    --late-bg: #33211a;
+    --late-line: #543528;
+    --partial: #d99a4f;
+    --c-ok: #56b389;
+    --c-yellow: #f4d03f;
+    --c-orange: #ef9245;
+    --c-red: #db7a5f;
+    --tint: #22302f;
+    --tint-line: #33474a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px rgba(0,0,0,.35);
+  }
+}
+
+* { box-sizing: border-box; }
+/* Keep a vertical scrollbar reserved at all times so the centred layout doesn't
+   shift sideways when the page grows tall enough to need one (e.g. after data
+   loads). On overlay-scrollbar systems (mobile, default macOS) this reserves
+   nothing and those never shift anyway. */
+html { -webkit-text-size-adjust: 100%; overflow-x: hidden; overflow-y: scroll; }
+body {
+  margin: 0; font-family: var(--font); color: var(--ink); line-height: 1.5;
+  background: linear-gradient(180deg, var(--bg1), var(--bg2));
+  background-attachment: fixed; min-height: 100vh;
+}
+h1, h2 { margin: 0; font-weight: 800; letter-spacing: -.01em; }
+h2 { font-size: 1.02rem; }
+p { margin: 0; }
+b, strong { font-weight: 800; }
+.wrap { width: 100%; max-width: 620px; margin: 0 auto; padding: 0 18px; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+
+/* header */
+.site-header { text-align: center; padding-top: 34px; padding-bottom: 6px; }
+.eyebrow {
+  display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .18em;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  padding: 5px 14px; border-radius: 999px; margin-bottom: 14px;
+}
+h1 {
+  font-size: 2.6rem; font-weight: 900; letter-spacing: -.03em; line-height: 1;
+  background: linear-gradient(100deg, var(--brand), var(--ink-soft));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.tagline { color: var(--ink-soft); font-size: .92rem; font-weight: 700; margin-top: 10px; }
+.tagline b { color: var(--brand); }
+
+.icon-btn {
+  position: fixed; top: 16px; right: 16px; z-index: 20;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
+  width: 58px; height: 58px; border-radius: 16px; font-size: 1.5rem; cursor: pointer;
+  box-shadow: var(--shadow); transition: color .15s, border-color .15s;
+}
+.icon-btn:hover { color: var(--brand); border-color: var(--brand); }
+
+.app-version {
+  position: fixed; top: 16px; left: 16px; z-index: 20;
+  font-size: .72rem; font-weight: 800; letter-spacing: .04em;
+  color: var(--ink-soft); opacity: .55;
+  padding: 6px 10px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--line);
+  box-shadow: var(--shadow); font-variant-numeric: tabular-nums;
+}
+
+/* banner */
+.banner {
+  margin-top: 14px; background: var(--card); color: var(--ink-soft);
+  border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm); padding: 11px 15px; font-size: .88rem; font-weight: 600;
+  box-shadow: var(--shadow);
+}
+.banner a { color: var(--brand); font-weight: 800; cursor: pointer; }
+
+main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
+
+/* cards */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+
+/* HERO */
+.hero { position: relative; padding-top: 22px; }
+.hero::before {
+  content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, var(--accent), var(--brand));
+}
+/* full-bleed to the card edges so more of the fan is visible */
+.week-nav { margin: 18px -20px 0; }
+
+/* Cover Flow calendar picker */
+/* touch-action: none — horizontal drag never triggers vertical page scroll */
+.coverflow { position: relative; height: 132px; perspective: 760px; overflow: hidden; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+  /* iOS Safari doesn't clip 3D-transformed children with overflow:hidden alone;
+     a solid mask forces it to clip to these bounds so cards can't pan the page */
+  -webkit-mask-image: -webkit-radial-gradient(white, black); mask-image: radial-gradient(white, black); }
+.coverflow:active { cursor: grabbing; }
+.cf-track { position: absolute; inset: 0; transform-style: preserve-3d; }
+.cal {
+  position: absolute; left: 50%; top: 50%; width: 62px; height: 74px;
+  margin-left: -31px; margin-top: -37px; padding: 0; border: 0; cursor: pointer;
+  background: var(--card); border-radius: 13px; overflow: hidden;
+  display: flex; flex-direction: column; transform-origin: 50% 50%;
+  box-shadow: 0 6px 16px rgba(43, 51, 61, .18);
+  transition: box-shadow .3s ease;  /* motion is driven per-frame by the rAF engine */
+  will-change: transform, opacity; backface-visibility: hidden;
+}
+.cal-top { background: var(--accent); color: #fff; font-size: .56rem; font-weight: 800; letter-spacing: .1em; text-align: center; padding: 3px 0 2px; }
+.cal-day { flex: 1; display: grid; place-items: center; font-size: 1.55rem; font-weight: 900; color: var(--ink); }
+.cal-bar { position: absolute; left: 50%; bottom: 6px; width: 34px; height: 3.5px; margin-left: -17px; border-radius: 2px; background: transparent; }
+.cal.is-center { box-shadow: 0 12px 26px rgba(43, 51, 61, .3); }
+.cal.is-center .cal-day { color: var(--brand); }
+
+/* the timeline slider — the time lives on each handle ("the picker") */
+.timeline { margin-top: 6px; padding: 62px 22px 0; }
+.tl-track {
+  position: relative; height: 16px; border-radius: 999px; background: transparent; touch-action: none;
+}
+.tl-track::before {   /* the cream lane — scales out from the centre while forming */
+  content: ""; position: absolute; inset: 0; border-radius: 999px;
+  background: var(--line-soft); border: 1px solid var(--line);
+  transform: scaleX(1); transform-origin: center;
+}
+.tl-fill {
+  position: absolute; top: -1px; bottom: -1px; left: 25%; width: 50%; border-radius: 999px;
+  background: var(--c-ok); /* replaced at runtime with a start-to-end gradient */
+}
+.tl-tick { position: absolute; top: 50%; width: 0; height: 30px; transform: translate(-50%, -50%); border-left: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent); }
+.tl-tick.t1 { left: 25%; }
+.tl-tick.t2 { left: 75%; }
+.tl-handle {
+  --hc: var(--brand);
+  position: absolute; top: 50%; left: 25%; width: 58px; height: 58px; transform: translate(-50%, -50%);
+  border-radius: 50%; background: var(--card); border: 4px solid var(--hc); cursor: grab;
+  padding: 0; touch-action: none; box-shadow: 0 3px 8px rgba(43,51,61,.2); transition: border-color .15s, box-shadow .15s;
+  display: grid; place-items: center; z-index: 2;
+}
+.tl-handle:hover { box-shadow: 0 4px 12px rgba(43,51,61,.28); }
+.tl-handle:active { cursor: grabbing; }
+.tl-handle:focus-visible { outline: none; box-shadow: 0 0 0 5px color-mix(in srgb, var(--hc) 28%, transparent); }
+/* the handle is a little clock face; the hands show the time it's set to */
+.tl-clock { position: absolute; inset: 0; pointer-events: none; }
+.tl-hand { position: absolute; left: 50%; bottom: 50%; background: var(--hc); border-radius: 2px; transform-origin: 50% 100%; transition: transform .12s ease, background .15s; }
+.tl-hand.hour { width: 3px; height: 12px; margin-left: -1.5px; transform: rotate(var(--h, 0deg)); }
+.tl-hand.minute { width: 2px; height: 16px; margin-left: -1px; transform: rotate(var(--m, 0deg)); }
+.tl-hub { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--hc); transition: background .15s; }
+@media (prefers-reduced-motion: reduce) { .tl-hand { transition: background .15s; } }
+/* the value flag above each handle */
+.tl-flag {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 11px;
+  display: flex; flex-direction: column; align-items: center; line-height: 1.02;
+  white-space: nowrap; pointer-events: none;
+}
+.tl-cap { font-size: .6rem; font-weight: 800; letter-spacing: .14em; color: var(--ink-soft); }
+.tl-time { font-size: 1.55rem; font-weight: 900; color: var(--hc); }
+
+/* control cluster below the timeline: ✕ cancel · +/✓ save · ✎ notes.
+   The + starts lifted up onto the timeline line; on tap it drops into the row
+   and the two satellites slide out from it. */
+.hero-controls { position: relative; min-height: 48px; margin-top: 14px; }
+.tl-cluster { position: absolute; left: 50%; top: 50%; --fab-lift: -84px; transition: opacity .3s ease, visibility 0s; }
+.tl-cluster > button {
+  position: absolute; left: 0; top: 0; width: 58px; height: 58px; border-radius: 50%;
+  border: 0; padding: 0; cursor: pointer; display: grid; place-items: center;
+  font-weight: 900; line-height: 1;
+}
+/* recorded: the ✓ fades quickly while the edit pencil glides sideways in from
+   exactly where it was (JS FLIP), so the check reads as sliding into the pencil. */
+.recorded .tl-cluster { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .2s ease, visibility 0s .2s; }
+
+/* save / record button (+ ↔ ✓) */
+.tl-fab {
+  z-index: 26; font-size: 1.7rem; background: var(--c-ok); color: #fff; border: 4px solid var(--c-ok);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--c-ok) 45%, transparent);
+  transform: translate(-50%, -50%);   /* dropped into the row (editing) */
+  transition: transform .55s cubic-bezier(.4,0,.2,1), background .3s ease, color .2s ease, box-shadow .3s ease;
+}
+.tl-fab:hover { filter: brightness(1.05); }
+
+/* The button shows one of two things: the ✓ text, or the "+" — and the "+" is
+   built from the SAME two arms that act as the clock hands while loading, so the
+   hands literally morph into the +. */
+.fab-glyph, .fab-cp { position: absolute; inset: 0; }
+.fab-glyph { display: grid; place-items: center; opacity: 0; transition: opacity .15s ease; }  /* ✓ */
+.tl-fab.as-check .fab-glyph { opacity: 1; }
+.fab-cp { opacity: 1; }
+.tl-fab.as-check .fab-cp { opacity: 0; }
+
+/* at rest the two arms are the strokes of the + — 3px wide, centred, crossing */
+.fab-arm { position: absolute; left: 50%; bottom: 50%; width: 3px; height: 12px; margin-left: -1.5px; background: currentColor; border-radius: 2px; transform-origin: 50% 100%; }
+.fab-arm.hour { transform: rotate(0deg); }      /* vertical stroke */
+.fab-arm.minute { transform: rotate(90deg); }   /* horizontal stroke */
+.fab-arm::before { content: ""; position: absolute; top: 100%; left: 0; width: 100%; height: 100%; background: currentColor; border-radius: 2px; transform-origin: 50% 0; transform: scaleY(1); }  /* the other half of the stroke */
+
+/* loading: shorten the arms into clock hands (hour short, minute long), only one
+   half each, pivoting at the centre. Each spins on its own — the minute hand 60x
+   faster than the hour hand (real-clock 12:1 ratio). 3px wide, matching the + strokes. */
+.tl-fab.loading .fab-arm.hour   { height: 10px; animation: fabHand 7.2s linear infinite; }
+.tl-fab.loading .fab-arm.minute { height: 15px; animation: fabHand 0.6s linear infinite; }
+.tl-fab.loading .fab-arm::before { transform: scaleY(0); }
+
+/* settling: the hands grow their other halves and equalise length → become the +
+   (the spin-down itself is driven from JS so it continues from the live angle) */
+.tl-fab.settling .fab-arm { transition: height .5s ease; }
+.tl-fab.settling .fab-arm::before { transition: transform .5s ease; }
+
+@keyframes fabHand { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .tl-fab.loading .fab-arm { animation: none; } }
+
+.state-empty .tl-fab {   /* empty: white +, lifted up onto the timeline line */
+  background: var(--card); color: var(--c-ok); font-size: 1.5rem;
+  box-shadow: 0 3px 8px rgba(43,51,61,.2);
+  transform: translate(-50%, calc(-50% + var(--fab-lift)));
+}
+
+/* the two satellites — collapsed behind the save button, slide out when editing */
+.tl-ctl {
+  z-index: 24; font-size: 1.05rem; background: var(--card); color: var(--ink-soft);
+  border: 1px solid var(--line) !important; box-shadow: 0 3px 8px rgba(43,51,61,.14);
+  transform: translate(-50%, -50%) scale(.2); opacity: 0; pointer-events: none;
+  transition: transform .45s cubic-bezier(.34,.8,.3,1) .28s, opacity .35s ease .28s, color .15s, border-color .15s;
+}
+.tl-ctl.x { color: var(--ink-soft); }
+.tl-ctl.del { color: var(--late); }
+.tl-ctl.notes.has-note { color: var(--brand); border-color: var(--brand) !important; }
+#heroInput:not(.state-empty):not(.recorded) .tl-ctl { pointer-events: auto; opacity: 1; }
+#heroInput:not(.state-empty):not(.recorded) .tl-ctl.x { transform: translate(calc(-50% - 74px), -50%) scale(1); }
+#heroInput:not(.state-empty):not(.recorded) .tl-ctl.notes { transform: translate(calc(-50% + 74px), -50%) scale(1); }
+/* delete sits just left of ✕, and only for an already-saved week being edited */
+#heroInput.editing.has-record .tl-ctl.del { pointer-events: auto; opacity: 1; transform: translate(calc(-50% - 148px), -50%) scale(1); }
+#heroInput:not(.has-record) .tl-ctl.del { opacity: 0 !important; pointer-events: none !important; transform: translate(-50%, -50%) scale(.2) !important; }
+.tl-ctl:hover { filter: brightness(.98); }
+
+.notes-area {
+  font: inherit; color: var(--ink); background: var(--bg1); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); padding: 11px 13px; width: 100%; resize: vertical; margin-bottom: 4px;
+}
+.notes-area:focus { outline: none; border-color: var(--brand); }
+
+/* the whole timeline unfolds from the centre button when a week is armed.
+   these transitions only apply while .forming is on, so dragging stays instant
+   and scrolling between weeks snaps rather than animates. */
+.timeline.forming .tl-track::before { transition: transform .7s cubic-bezier(.5,0,.2,1), opacity .4s ease; }
+.timeline.forming .tl-handle,
+.timeline.forming .tl-fill,
+.timeline.forming .tl-tick { transition: left .7s cubic-bezier(.5,0,.2,1), width .7s cubic-bezier(.5,0,.2,1), opacity .5s ease; }
+.timeline.forming .tl-flag { transition: opacity .5s ease .15s; }
+/* .tl-axis labels slide out from the centre — driven per-label from JS so the
+   outer labels (farther to travel) move at the same speed and finish last. */
+
+/* empty: the timeline is folded into the centre, behind the + button */
+.state-empty .tl-track::before { transform: scaleX(0); opacity: 0; }
+.state-empty .tl-fill { left: 50% !important; width: 0 !important; }
+.state-empty .tl-tick { left: 50% !important; opacity: 0; }
+.state-empty .tl-handle { left: 50% !important; opacity: 0; pointer-events: none; }
+.state-empty .tl-flag { opacity: 0; }
+.state-empty .tl-axis { opacity: 0; }
+.tl-axis { display: flex; justify-content: space-between; margin-top: 34px; font-size: .68rem; font-weight: 800; color: var(--muted); transition: opacity .35s ease; }
+
+@media (max-width: 420px) {
+  .timeline { padding: 58px 16px 0; }
+  .tl-time { font-size: 1.35rem; }
+  .tl-handle { width: 64px; height: 64px; }
+}
+
+.btn {
+  font: inherit; font-weight: 800; border-radius: 11px; padding: 16px 26px;
+  border: 1px solid transparent; cursor: pointer; transition: filter .15s, background .15s, border-color .15s;
+}
+.btn.primary {
+  background: linear-gradient(180deg, var(--brand), var(--brand-2)); color: var(--brand-ink);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 28%, transparent);
+}
+.btn.primary:hover { filter: brightness(1.05); }
+.btn.big { flex: 1; font-size: 1.02rem; padding: 19px 26px; }
+.btn.ghost { background: var(--card); color: var(--ink); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--brand); color: var(--brand); }
+.btn.ghost.danger:hover { border-color: var(--late); color: var(--late); }
+.btn.small { padding: 12px 20px; font-size: .84rem; }
+
+/* recorded state: the timeline stays, but reads as a record, not a control */
+.recorded .tl-track { pointer-events: none; }
+.recorded .tl-track::before { opacity: 0; }
+.recorded .tl-handle { cursor: default; box-shadow: 0 2px 5px rgba(43,51,61,.16); }
+.recorded .tl-axis { opacity: 0; pointer-events: none; }
+/* recorded view: verdict comment + edit pencil, centred on the same line the
+   controls sat on (so the ✓ slides horizontally into the pencil) */
+.recorded-head { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; gap: 12px; }
+.recorded-head[hidden] { display: none; }
+.recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; animation: recIn .45s ease both; }
+.rec-edit {
+  flex: none; width: 46px; height: 46px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
+  font-size: 1.4rem; line-height: 1; cursor: pointer; display: grid; place-items: center;
+  box-shadow: 0 2px 6px rgba(43,51,61,.12); transition: color .15s, border-color .15s, transform .12s;
+}
+.rec-edit:hover { color: var(--brand); border-color: var(--brand); }
+.rec-edit:active { transform: scale(.94); }
+@keyframes recIn { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .recorded-verdict { animation: none; } }
+.recorded-notes { text-align: center; color: var(--ink-soft); font-weight: 600; margin-top: 10px; font-style: italic; }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 15px 10px; text-align: center; box-shadow: var(--shadow); }
+.stat-value { font-size: 1.85rem; font-weight: 900; letter-spacing: -.02em; line-height: 1; color: var(--brand); }
+.stat-label { margin-top: 6px; font-size: .78rem; font-weight: 800; }
+.stat-sub { font-size: .68rem; color: var(--muted); margin-top: 2px; font-weight: 700; }
+
+/* GOAL */
+.goal-top { display: flex; align-items: center; gap: 18px; }
+.ring {
+  --deg: 0deg; position: relative; width: 96px; height: 96px; flex: 0 0 auto; border-radius: 50%;
+  background: conic-gradient(var(--brand) var(--deg), var(--line-soft) 0deg);
+}
+.ring-hole { position: absolute; inset: 9px; border-radius: 50%; background: var(--card); display: grid; place-items: center; }
+.ring-hole b { font-size: 1.25rem; font-weight: 900; color: var(--brand); }
+.goal-body { flex: 1; }
+.goal-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.goal-target { font-size: .78rem; color: var(--ink-soft); font-weight: 800; }
+.goal-msg { font-size: .92rem; color: var(--ink-soft); font-weight: 700; }
+.goal-msg strong { color: var(--ink); }
+.insight-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
+.insight { text-align: center; }
+.insight-label { display: block; font-size: .66rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; font-weight: 800; }
+.insight-value { display: block; font-size: 1.02rem; font-weight: 900; margin-top: 3px; }
+
+/* STRIP */
+.strip { display: flex; flex-wrap: wrap; gap: 7px; }
+.strip .cell {
+  width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center;
+  font-size: .85rem; font-weight: 800; color: #fff; border: 0; cursor: pointer; transition: transform .1s;
+}
+.strip .cell:hover { transform: translateY(-2px); }
+.strip .cell.ok { background: var(--ok); }
+.strip .cell.partial { background: var(--partial); }
+.strip .cell.late { background: var(--late); }
+.legend { display: flex; gap: 16px; margin-top: 14px; font-size: .76rem; color: var(--ink-soft); flex-wrap: wrap; font-weight: 700; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+.dot.ok { background: var(--ok); }
+.dot.partial { background: var(--partial); }
+.dot.late { background: var(--late); }
+
+/* HISTORY GRAPH — one bar per week spanning that week's start→end time on a
+   1 PM–3 PM axis (like a sleep chart). Colour reuses the start→end gradient.
+   On first reveal the real calendar bars & dates fly here from the picker. */
+.hg-hint { font-size: .72rem; font-weight: 800; letter-spacing: .02em; color: var(--muted); }
+.hg-chart { display: flex; gap: 8px; min-width: 0; }
+.hg-yaxis { position: relative; width: 38px; flex: none; }
+.hg-ytick { position: absolute; right: 0; transform: translateY(-50%); font-size: .62rem; font-weight: 800; color: var(--muted); white-space: nowrap; }
+.hg-main { flex: 1 1 0; min-width: 0; }
+.hg-plot { position: relative; display: flex; min-width: 0; }
+.hg-grid { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--line-soft); pointer-events: none; }
+.hg-grid.target { border-top: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent); }
+.hg-col { flex: 1 1 0; min-width: 0; position: relative; cursor: pointer; }
+.hg-bar {
+  position: absolute; left: 50%; margin-left: -7px; width: 14px; min-height: 8px; border-radius: 7px;
+  box-shadow: 0 2px 6px rgba(43,51,61,.18); z-index: 2;
+}
+.hg-col:hover .hg-bar { filter: brightness(1.05); }
+.hg-bar.is-current { box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 30%, transparent), 0 2px 6px rgba(43,51,61,.2); }
+.hg-xrow { display: flex; margin-top: 8px; min-width: 0; }
+.hg-xcol { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; line-height: 1; cursor: pointer; overflow: hidden; }
+.hg-mon { font-size: .46rem; font-weight: 800; letter-spacing: .06em; color: #fff; background: var(--accent); border-radius: 4px; padding: 1.5px 4px; }
+.hg-day { font-size: 1rem; font-weight: 900; color: var(--ink); }
+.hg-xcol.is-current .hg-day { color: var(--brand); }
+/* clones that carry each week's bar & date from the calendar down to the graph
+   as you scroll; positioned in document coordinates, painted above everything */
+/* fixed positioning so the flying clones never add to the page's scroll size
+   (positions are recomputed as viewport coords each frame while scrolling) */
+#hgFlyLayer { position: fixed; top: 0; left: 0; width: 0; height: 0; }
+.hg-fly-bar { position: fixed; box-shadow: 0 2px 6px rgba(43,51,61,.2); pointer-events: none; opacity: 0; z-index: 60; will-change: left, top, width, height, transform; }
+/* clones are exact copies of the real calendar nodes (they keep .cal-bar /
+   .cal-day / .cal-top styling); we only add fixed positioning */
+.hg-fly-clone { position: fixed; pointer-events: none; opacity: 0; z-index: 60; overflow: hidden; will-change: left, top, transform; }
+
+/* HISTORY */
+.entry { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 13px 2px; border-bottom: 1px solid var(--line-soft); }
+.entry:last-child { border-bottom: 0; }
+.entry-date { font-weight: 800; font-size: .92rem; white-space: nowrap; }
+.entry-date .yr { color: var(--muted); font-weight: 700; }
+.entry-times { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { border-radius: 999px; padding: 3px 11px; font-weight: 800; font-size: .76rem; white-space: nowrap; border: 1px solid transparent; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-line); }
+.pill.late { background: var(--late-bg); color: var(--late); border-color: var(--late-line); }
+.entry-notes { font-size: .77rem; color: var(--muted); margin-top: 3px; font-weight: 600; font-style: italic; }
+.entry-actions { display: flex; gap: 5px; }
+.mini-btn { border: 1px solid var(--line); background: var(--card); color: var(--ink-soft); border-radius: 9px; width: 33px; height: 33px; cursor: pointer; font-size: .85rem; transition: color .15s, border-color .15s; }
+.mini-btn:hover { color: var(--brand); border-color: var(--brand); }
+.empty { text-align: center; color: var(--muted); padding: 22px 0; font-weight: 700; }
+
+/* dialog */
+.dialog { border: 1px solid var(--line); border-radius: var(--radius); padding: 0; background: var(--card); color: var(--ink); max-width: 440px; width: calc(100% - 32px); box-shadow: var(--shadow); }
+.dialog::backdrop { background: rgba(30, 26, 20, .4); backdrop-filter: blur(2px); }
+.dialog-inner { padding: 24px; }
+.dialog-inner h2 { margin-bottom: 6px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.field label { font-size: .8rem; font-weight: 800; color: var(--ink-soft); }
+.field input { font: inherit; color: var(--ink); background: var(--bg1); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 11px 13px; width: 100%; }
+.field input:focus { outline: none; border-color: var(--brand); }
+.cfg-status { font-size: .84rem; min-height: 1.2em; margin: 4px 0; font-weight: 800; }
+.cfg-status.ok { color: var(--ok); }
+.cfg-status.late { color: var(--late); }
+.form-actions { display: flex; align-items: center; gap: 10px; }
+.spacer { flex: 1; }
+
+/* toast */
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--card); padding: 11px 20px; border-radius: 999px; font-size: .9rem; font-weight: 800; box-shadow: var(--shadow); z-index: 30; max-width: 90vw; }
+
+.site-footer { text-align: center; color: var(--muted); font-size: .8rem; padding-bottom: 30px; font-weight: 700; }
+
+/* responsive */
+@media (max-width: 560px) {
+  h1 { font-size: 2.15rem; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .insight-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-value { font-size: 1.6rem; }
+}
+@media (max-width: 380px) {
+  .goal-top { flex-direction: column; text-align: center; }
+  .goal-head { justify-content: center; gap: 8px; }
+}
