@@ -242,9 +242,11 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 
 @keyframes fabHand { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 @keyframes fabSettle {
-  0%   { transform: rotate(0deg);   animation-timing-function: linear; }          /* steady spin… */
-  30%  { transform: rotate(260deg); animation-timing-function: cubic-bezier(.2,.7,.3,1); } /* …for ~0.3s */
-  100% { transform: rotate(720deg); }                                             /* then decelerate to a stop, upright */
+  /* spin at the clock's minute-hand speed (300°/s = 90° in 0.3s), then ease to
+     a stop. The + is 90°-symmetric, so 270° still lands upright. */
+  0%   { transform: rotate(0deg);   animation-timing-function: linear; }
+  30%  { transform: rotate(90deg);  animation-timing-function: cubic-bezier(.2,.7,.3,1); }
+  100% { transform: rotate(270deg); }
 }
 @media (prefers-reduced-motion: reduce) {
   .tl-fab.loading .fab-hand { animation: none; }
