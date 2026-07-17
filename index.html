@@ -24,12 +24,6 @@
   <main class="wrap">
     <!-- HERO: this week's entry -->
     <section class="card hero" aria-label="Log this week">
-      <div class="week-nav">
-        <div class="coverflow" id="coverflow">
-          <div class="cf-track" id="cfTrack"></div>
-        </div>
-      </div>
-
       <!-- the meeting timeline is always shown; a "recorded" class flips it
            from an editable slider to a read-only record display -->
       <form id="heroInput" class="state-empty" novalidate>
@@ -84,6 +78,14 @@
         </div>
         <p class="recorded-notes" id="recNotes" hidden></p>
       </form>
+
+      <!-- the Sunday picker sits at the bottom so a scrolling finger never
+           covers the timeline above it -->
+      <div class="week-nav">
+        <div class="coverflow" id="coverflow">
+          <div class="cf-track" id="cfTrack"></div>
+        </div>
+      </div>
     </section>
 
     <!-- STATS -->
