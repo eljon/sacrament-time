@@ -260,15 +260,34 @@
 
   function prefersReduced() { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
 
-  // record button loading animation: spinning clock → merge into + → settle
+  // record button loading animation: spinning clock → hands morph into + → stop
   function startFabLoading() { $("recordFab").classList.add("loading"); }
   function finishFabLoading() {
     var fab = $("recordFab");
     if (!fab.classList.contains("loading")) return;
+    var cp = fab.querySelector(".fab-cp");
+    // read the clock's live angle so the spin-down continues without a jump
+    var m = new DOMMatrix(getComputedStyle(cp).transform);
+    var start = Math.atan2(m.b, m.a) * 180 / Math.PI;
     fab.classList.remove("loading");
-    if (prefersReduced()) return;
-    fab.classList.add("settling");
-    setTimeout(function () { fab.classList.remove("settling"); }, 1020);
+    fab.classList.add("settling");           // arms grow into the +
+    if (prefersReduced()) { fab.classList.remove("settling"); return; }
+    cp.style.animation = "none";
+    // keep the clock's 300°/s for ~0.3s, then ease to a stop on a quarter-turn
+    var SPEED = 300, P1 = 300, P2 = 700;
+    var mid = start + SPEED * (P1 / 1000);
+    var target = Math.round((mid + 105) / 90) * 90; // 90°-multiple → upright +
+    var t0 = null;
+    function frame(ts) {
+      if (t0 === null) t0 = ts;
+      var t = ts - t0, deg;
+      if (t <= P1) deg = start + SPEED * (t / 1000);
+      else if (t <= P1 + P2) deg = mid + (target - mid) * (1 - Math.pow(1 - (t - P1) / P2, 2));
+      else { cp.style.transform = "rotate(" + target + "deg)"; fab.classList.remove("settling"); cp.style.transform = ""; cp.style.animation = ""; return; }
+      cp.style.transform = "rotate(" + deg + "deg)";
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   }
 
   // tap the record button on an empty week → the whole timeline (lane, ticks,

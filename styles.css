@@ -215,43 +215,35 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 }
 .tl-fab:hover { filter: brightness(1.05); }
 
-/* the button's glyph is one of three layers, all the same footprint:
-   the drawn + (resting AND the animation target), the ✓ text, or the clock. */
-.fab-glyph, .fab-clock, .fab-plus { position: absolute; inset: 0; }
+/* The button shows one of two things: the ✓ text, or the "+" — and the "+" is
+   built from the SAME two arms that act as the clock hands while loading, so the
+   hands literally morph into the +. */
+.fab-glyph, .fab-cp { position: absolute; inset: 0; }
 .fab-glyph { display: grid; place-items: center; opacity: 0; transition: opacity .15s ease; }  /* ✓ */
 .tl-fab.as-check .fab-glyph { opacity: 1; }
-.fab-plus { opacity: 1; transition: opacity .16s ease; }                                        /* + */
-.tl-fab.as-check .fab-plus { opacity: 0; }
-.fab-plus::before, .fab-plus::after { content: ""; position: absolute; left: 50%; top: 50%; background: currentColor; border-radius: 2px; transform: translate(-50%, -50%); }
-.fab-plus::before { width: 3px; height: 17px; }
-.fab-plus::after { width: 17px; height: 3px; }
-.fab-clock { opacity: 0; }
-.fab-hand { position: absolute; left: 50%; bottom: 50%; background: currentColor; border-radius: 2px; transform-origin: 50% 100%; }
-.fab-hand.hour { width: 3px; height: 8px; margin-left: -1.5px; }
-.fab-hand.minute { width: 2px; height: 12px; margin-left: -1px; }
+.fab-cp { opacity: 1; }
+.tl-fab.as-check .fab-cp { opacity: 0; }
 
-/* loading: clock spins in place, + and ✓ hidden */
-.tl-fab.loading .fab-clock { opacity: 1; }
-.tl-fab.loading .fab-plus, .tl-fab.loading .fab-glyph { opacity: 0; }
-.tl-fab.loading .fab-hand.hour { animation: fabHand 5s linear infinite; }
-.tl-fab.loading .fab-hand.minute { animation: fabHand 1.2s linear infinite; }
-/* settling: clock fades out, the + fades in and spins to a stop (same + that rests) */
-.tl-fab.settling .fab-clock { opacity: 0; }
-.tl-fab.settling .fab-glyph { opacity: 0; }
-.tl-fab.settling .fab-plus { opacity: 1; animation: fabSettle 1s forwards; }
+/* at rest the two arms are the strokes of the + — 3px wide, centred, crossing */
+.fab-arm { position: absolute; left: 50%; bottom: 50%; width: 3px; height: 8.5px; margin-left: -1.5px; background: currentColor; border-radius: 2px; transform-origin: 50% 100%; }
+.fab-arm.hour { transform: rotate(0deg); }      /* vertical stroke */
+.fab-arm.minute { transform: rotate(90deg); }   /* horizontal stroke */
+.fab-arm::before { content: ""; position: absolute; top: 100%; left: 0; width: 100%; height: 100%; background: currentColor; border-radius: 2px; transform-origin: 50% 0; transform: scaleY(1); }  /* the other half of the stroke */
+
+/* loading: shorten the arms into clock hands (hour short, minute long) with only
+   one half, and spin them; same 3px width as the + strokes */
+.tl-fab.loading .fab-arm.hour   { height: 7px; }
+.tl-fab.loading .fab-arm.minute { height: 11px; }
+.tl-fab.loading .fab-arm::before { transform: scaleY(0); }
+.tl-fab.loading .fab-cp { animation: fabHand 1.2s linear infinite; } /* 300°/s = the clock's hand speed */
+
+/* settling: the hands grow their other halves and equalise length → become the +
+   (the spin-down itself is driven from JS so it continues from the live angle) */
+.tl-fab.settling .fab-arm { transition: height .5s ease; }
+.tl-fab.settling .fab-arm::before { transition: transform .5s ease; }
 
 @keyframes fabHand { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-@keyframes fabSettle {
-  /* spin at the clock's minute-hand speed (300°/s = 90° in 0.3s), then ease to
-     a stop. The + is 90°-symmetric, so 270° still lands upright. */
-  0%   { transform: rotate(0deg);   animation-timing-function: linear; }
-  30%  { transform: rotate(90deg);  animation-timing-function: cubic-bezier(.2,.7,.3,1); }
-  100% { transform: rotate(270deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tl-fab.loading .fab-hand { animation: none; }
-  .tl-fab.settling .fab-plus { animation: none; }
-}
+@media (prefers-reduced-motion: reduce) { .tl-fab.loading .fab-cp { animation: none; } }
 
 .state-empty .tl-fab {   /* empty: white +, lifted up onto the timeline line */
   background: var(--card); color: var(--c-ok); font-size: 1.5rem;
