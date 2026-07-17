@@ -356,11 +356,11 @@
   function scrollToHero() { document.querySelector(".hero").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
   // ---- Timeline slider ------------------------------------------------------
-  // Continuous colour for how late an end is: a straight green→red blend that
-  // eases one step per minute and reaches full red at LATE_FULL minutes. Anchors
-  // are read from the CSS variables so the scale follows the light/dark theme.
-  var LATE_FULL = 10;
-  var GREEN = null, RED = null;
+  // Continuous colour for how late an end is: green when on time, easing to a
+  // yellow-orange at LATE_MID minutes, then on to full red at LATE_FULL minutes.
+  // Anchors are read from the CSS variables so the scale follows the theme.
+  var LATE_MID = 5, LATE_FULL = 10;
+  var GREEN = null, AMBER = null, RED = null;
   function parseColor(str) {
     str = (str || "").trim();
     if (str.charAt(0) === "#") {
@@ -375,12 +375,15 @@
   function loadStops() {
     var cs = getComputedStyle(document.documentElement);
     GREEN = parseColor(cs.getPropertyValue("--c-ok"));
+    AMBER = parseColor(cs.getPropertyValue("--c-amber"));
     RED = parseColor(cs.getPropertyValue("--c-red"));
   }
   function lateColor(dev) {
     if (!GREEN) loadStops();
     if (dev == null || dev <= 0) return rgb(GREEN);
-    return rgb(mixColor(GREEN, RED, Math.min(dev / LATE_FULL, 1)));
+    if (dev >= LATE_FULL) return rgb(RED);
+    if (dev <= LATE_MID) return rgb(mixColor(GREEN, AMBER, dev / LATE_MID));
+    return rgb(mixColor(AMBER, RED, (dev - LATE_MID) / (LATE_FULL - LATE_MID)));
   }
   function mixColor(a, b, t) {
     return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)];

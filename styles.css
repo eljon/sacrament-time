@@ -21,8 +21,9 @@
   --late-bg: #f8ece5;
   --late-line: #ecd3c6;
   --partial: #cf8a3c;
-  /* lateness scale for the timeline: green (on time) blends to red at 10 min */
+  /* lateness scale: green (on time) → yellow-orange at 5 min → red at 10 min */
   --c-ok: #2f8f6d;
+  --c-amber: #e0912a;
   --c-red: #c0563f;
   --tint: #eef4f6;        /* recorded / selected tint */
   --tint-line: #d9e6ea;
@@ -53,6 +54,7 @@
     --late-line: #543528;
     --partial: #d99a4f;
     --c-ok: #56b389;
+    --c-amber: #eaa64a;
     --c-red: #db7a5f;
     --tint: #22302f;
     --tint-line: #33474a;
