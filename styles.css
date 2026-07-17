@@ -213,8 +213,10 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   border: 0; padding: 0; cursor: pointer; display: grid; place-items: center;
   font-weight: 900; line-height: 1;
 }
-/* recorded: the cluster fades out as the verdict comment settles in */
+/* recorded: the cluster fades out as the verdict comment settles in, while the
+   ✓ slides right and shrinks — the edit pencil glides in from where it was (JS FLIP) */
 .recorded .tl-cluster { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .3s ease, visibility 0s .3s; }
+.recorded .tl-fab { transform: translate(calc(-50% + 34px), -50%) scale(.82); }
 
 /* save / record button (+ ↔ ✓) */
 .tl-fab {
@@ -268,11 +270,15 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   transform: translate(-50%, -50%) scale(.2); opacity: 0; pointer-events: none;
   transition: transform .45s cubic-bezier(.34,.8,.3,1) .28s, opacity .35s ease .28s, color .15s, border-color .15s;
 }
-.tl-ctl.x { color: var(--late); }
+.tl-ctl.x { color: var(--ink-soft); }
+.tl-ctl.del { color: var(--late); }
 .tl-ctl.notes.has-note { color: var(--brand); border-color: var(--brand) !important; }
 #heroInput:not(.state-empty):not(.recorded) .tl-ctl { pointer-events: auto; opacity: 1; }
 #heroInput:not(.state-empty):not(.recorded) .tl-ctl.x { transform: translate(calc(-50% - 60px), -50%) scale(1); }
 #heroInput:not(.state-empty):not(.recorded) .tl-ctl.notes { transform: translate(calc(-50% + 60px), -50%) scale(1); }
+/* delete sits just left of ✕, and only for an already-saved week being edited */
+#heroInput.editing.has-record .tl-ctl.del { pointer-events: auto; opacity: 1; transform: translate(calc(-50% - 114px), -50%) scale(1); }
+#heroInput:not(.has-record) .tl-ctl.del { opacity: 0 !important; pointer-events: none !important; transform: translate(-50%, -50%) scale(.2) !important; }
 .tl-ctl:hover { filter: brightness(.98); }
 
 .notes-area {
@@ -307,10 +313,6 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   .tl-handle { width: 44px; height: 44px; }
 }
 
-
-.hero-actions { display: none; align-items: center; justify-content: center; gap: 10px; }
-.recorded .hero-actions { display: flex; }
-
 .btn {
   font: inherit; font-weight: 800; border-radius: 11px; padding: 11px 18px;
   border: 1px solid transparent; cursor: pointer; transition: filter .15s, background .15s, border-color .15s;
@@ -332,9 +334,9 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .recorded .tl-handle { cursor: default; box-shadow: 0 2px 5px rgba(43,51,61,.16); }
 .recorded .tl-axis { opacity: 0; pointer-events: none; }
 /* recorded view: verdict comment + an edit pencil beside it */
-.recorded-head { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 18px; animation: recIn .4s ease both; }
+.recorded-head { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 18px; }
 .recorded-head[hidden] { display: none; }
-.recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; }
+.recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; animation: recIn .4s ease both; }
 .rec-edit {
   flex: none; width: 30px; height: 30px; border-radius: 50%;
   border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
@@ -344,7 +346,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .rec-edit:hover { color: var(--brand); border-color: var(--brand); }
 .rec-edit:active { transform: scale(.94); }
 @keyframes recIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .recorded-head { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .recorded-verdict { animation: none; } }
 .recorded-notes { text-align: center; color: var(--ink-soft); font-weight: 600; margin-top: 4px; font-style: italic; }
 
 /* STATS */

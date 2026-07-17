@@ -5,7 +5,7 @@
   "use strict";
 
   // Bumped every commit (each commit is a new version).
-  var APP_VERSION = 38;
+  var APP_VERSION = 39;
 
   var DEFAULTS = window.APP_CONFIG || {};
   var LS_CONFIG = "stt.config";
@@ -238,6 +238,8 @@
     var form = $("heroInput");
     form.classList.toggle("state-empty", isEmpty);
     form.classList.toggle("recorded", isRecorded);
+    form.classList.toggle("editing", isEditing);
+    form.classList.toggle("has-record", !!rec);   // gates the delete button
 
     setSlider(rec ? rec.start : cfg.startTarget, rec ? rec.end : cfg.endTarget);
     setHandlesInteractive(isEditing);
@@ -247,8 +249,6 @@
     $("fabGlyph").textContent = isEmpty ? "" : "✓";
     fab.setAttribute("aria-label", isEmpty ? "Record this week" : "Save");
     $("notesBtn").classList.toggle("has-note", !!$("notes").value);
-
-    $("clearBtn").hidden = !isRecorded;
 
     if (isRecorded) {
       $("recHead").hidden = false;
@@ -388,7 +388,9 @@
       var wait = animate ? Math.max(0, 700 - (Date.now() - t0)) : 0;
       setTimeout(function () {
         fab.classList.remove("loading", "settling"); fab.disabled = false;
+        var fromRect = animate ? fab.getBoundingClientRect() : null;   // ✓ position
         renderAll();   // → recorded view: the clock settles into the verdict comment
+        if (animate) flipEditIn(fromRect);   // ✓ slides right and becomes the edit pencil
         toast(existing ? "Week updated" : "Week recorded");
       }, wait);
     }).catch(function (err) {
@@ -396,6 +398,22 @@
       renderHeroBody();   // restore the ✓ so the user can retry
       toast("Error: " + err.message);
     });
+  }
+  // FLIP: glide the edit pencil in from where the ✓ was, so the check appears to
+  // slide right and become the edit button rather than vanishing.
+  function flipEditIn(fromRect) {
+    if (!fromRect) return;
+    var btn = $("recEditBtn"), to = btn.getBoundingClientRect();
+    var dx = (fromRect.left + fromRect.width / 2) - (to.left + to.width / 2);
+    var dy = (fromRect.top + fromRect.height / 2) - (to.top + to.height / 2);
+    if (!isFinite(dx) || !isFinite(dy) || (Math.abs(dx) < 1 && Math.abs(dy) < 1)) return;
+    btn.style.transition = "none";
+    btn.style.transform = "translate(" + dx + "px," + dy + "px)";
+    void btn.offsetWidth;                 // commit the start position
+    btn.style.transition = "transform .5s cubic-bezier(.4,0,.2,1)";
+    btn.style.transform = "translate(0,0)";
+    var clear = function () { btn.style.transition = ""; btn.style.transform = ""; btn.removeEventListener("transitionend", clear); };
+    btn.addEventListener("transitionend", clear);
   }
   function setHandlesInteractive(on) {
     [$("tlStart"), $("tlEnd")].forEach(function (h) {
@@ -839,11 +857,7 @@
     $("notesCancelBtn").addEventListener("click", function () { $("notesDialog").close(); });
     window.addEventListener("resize", positionFab);
     $("recEditBtn").addEventListener("click", function () { var r = recordFor(state.selected); state.heroMode = "edit"; if (r) $("notes").value = r.notes || ""; renderHeroBody(); });
-    $("clearBtn").addEventListener("click", function () {
-      var r = recordFor(state.selected);
-      if (r) confirmDelete(r);
-      else { state.armed = false; renderHeroBody(); } // cancel a not-yet-saved week
-    });
+    $("delBtn").addEventListener("click", function () { var r = recordFor(state.selected); if (r) confirmDelete(r); });
     $("refreshBtn").addEventListener("click", function () { loadRecords().then(renderAll).catch(function (err) { toast("Error: " + err.message); }); });
     $("settingsBtn").addEventListener("click", openSettings);
     $("cfgTestBtn").addEventListener("click", testConnection);
