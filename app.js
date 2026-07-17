@@ -5,7 +5,7 @@
   "use strict";
 
   // Bumped every commit (each commit is a new version).
-  var APP_VERSION = 40;
+  var APP_VERSION = 41;
 
   var DEFAULTS = window.APP_CONFIG || {};
   var LS_CONFIG = "stt.config";
@@ -150,15 +150,31 @@
       state.records = (data.records || []).filter(function (r) { return r && r.date; });
     }).finally(function () { state.loading = false; });
   }
+  // one Sunday = one record, so upsert by date
+  function upsertRecord(list, rec) {
+    var out = (list || []).filter(function (r) { return r.date !== rec.date; });
+    out.push(rec); return out;
+  }
+  // Reconcile local state with the sheet without disturbing the UI (no spinner,
+  // no loading render). Used after an optimistic write so the save feels instant.
+  function syncInBackground() {
+    apiGet().then(function (data) {
+      if (data && data.ok !== false) { state.records = (data.records || []).filter(function (r) { return r && r.date; }); renderAll(); }
+    }).catch(function () {});
+  }
   function addRecord(rec) {
     if (!usingRemote()) {
       var recs = localRead().filter(function (r) { return r.date !== rec.date; });
       rec.id = uid(); recs.push(rec); localWrite(recs); state.records = recs;
       return Promise.resolve();
     }
+    // resolve as soon as the write lands; update state optimistically so the
+    // recorded view can render immediately (the sheet is re-synced in the background)
     return apiPost({ action: "add", date: rec.date, start: rec.start, end: rec.end, notes: rec.notes })
-      .then(function (res) { if (!res || res.ok === false) throw new Error((res && res.error) || "Save failed"); })
-      .then(loadRecords);
+      .then(function (res) {
+        if (!res || res.ok === false) throw new Error((res && res.error) || "Save failed");
+        rec.id = rec.id || uid(); state.records = upsertRecord(state.records, rec);
+      });
   }
   function updateRecord(rec) {
     if (!usingRemote()) {
@@ -166,8 +182,10 @@
       localWrite(recs); state.records = recs; return Promise.resolve();
     }
     return apiPost({ action: "update", id: rec.id, date: rec.date, start: rec.start, end: rec.end, notes: rec.notes })
-      .then(function (res) { if (!res || res.ok === false) throw new Error((res && res.error) || "Update failed"); })
-      .then(loadRecords);
+      .then(function (res) {
+        if (!res || res.ok === false) throw new Error((res && res.error) || "Update failed");
+        state.records = upsertRecord(state.records, rec);
+      });
   }
   function deleteRecord(id) {
     if (!usingRemote()) {
@@ -175,8 +193,10 @@
       localWrite(recs); state.records = recs; return Promise.resolve();
     }
     return apiPost({ action: "delete", id: id })
-      .then(function (res) { if (!res || res.ok === false) throw new Error((res && res.error) || "Delete failed"); })
-      .then(loadRecords);
+      .then(function (res) {
+        if (!res || res.ok === false) throw new Error((res && res.error) || "Delete failed");
+        state.records = state.records.filter(function (r) { return r.id !== id; });
+      });
   }
 
   // ---- Date helpers ---------------------------------------------------------
@@ -389,7 +409,7 @@
       var fromRect = animate ? fab.getBoundingClientRect() : null;   // ✓ position
       renderAll();   // → recorded view: verdict comment appears on the ✓'s line
       if (animate) flipEditIn(fromRect);   // ✓ slides sideways and becomes the edit pencil
-      toast(existing ? "Week updated" : "Week recorded");
+      if (usingRemote()) syncInBackground();
     }).catch(function (err) {
       fab.classList.remove("loading", "settling"); fab.disabled = false;
       renderHeroBody();   // restore the ✓ so the user can retry
@@ -784,8 +804,10 @@
 
   function confirmDelete(r) {
     if (!window.confirm("Delete the entry for " + shortDate(r.date) + "?")) return;
-    deleteRecord(r.id).then(function () { state.heroMode = "auto"; state.armed = false; renderAll(); toast("Deleted"); })
-      .catch(function (err) { toast("Error: " + err.message); });
+    deleteRecord(r.id).then(function () {
+      state.heroMode = "auto"; state.armed = false; renderAll();
+      if (usingRemote()) syncInBackground();
+    }).catch(function (err) { toast("Error: " + err.message); });
   }
 
   // ---- Settings -------------------------------------------------------------
