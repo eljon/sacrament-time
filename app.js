@@ -261,44 +261,35 @@
 
   function prefersReduced() { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
 
-  // tap the record button on an empty week → the + splits into the two handles
+  // tap the record button on an empty week → the button stays put (morphs + → ✓)
+  // while the two handles slide out from behind it and the line grows.
   function armAndForm() {
     state.armed = true; state.heroMode = "auto"; $("notes").value = "";
-    if (prefersReduced()) { renderHeroBody(); return; }
-    var fab = $("recordFab");
-    // 1. the + shrinks away at the centre
-    fab.style.transition = "opacity .2s ease, transform .2s cubic-bezier(.4,.0,.6,1)";
-    fab.style.opacity = "0"; fab.style.transform = "translate(-50%,-50%) scale(.35)";
-    setTimeout(function () {
-      // 2. form the timeline; the two handles are born at the centre and glide apart
-      renderHeroBody();          // editing view (fab becomes ✓ but held hidden)
-      fab.style.opacity = "0"; fab.style.transform = "translate(-50%,-50%) scale(.35)";
-      splitHandles();
-      // 3. the ✓ eases in at the middle of the formed line
-      setTimeout(function () {
-        fab.style.transition = "opacity .32s ease, transform .4s cubic-bezier(.3,.85,.3,1)";
-        fab.style.opacity = "1"; fab.style.transform = "translate(-50%,-50%) scale(1)";
-      }, 320);
-      setTimeout(function () { fab.style.transition = ""; fab.style.opacity = ""; fab.style.transform = ""; }, 780);
-    }, 190);
+    renderHeroBody();          // fab morphs to ✓ in place; timeline becomes visible
+    if (!prefersReduced()) splitHandles();
   }
   function splitHandles() {
     var s = $("tlStart"), e = $("tlEnd"), f = $("tlFill");
-    // both handles start stacked at the centre, small — reads as the single + circle
+    var sf = s.querySelector(".tl-flag"), ef = e.querySelector(".tl-flag");
+    // handles start stacked at the centre, hidden behind the button; fill zero.
+    // the time labels start faded out so they don't overlap while stacked.
     s.style.transition = "none"; e.style.transition = "none"; f.style.transition = "none";
+    sf.style.transition = "none"; ef.style.transition = "none";
     s.style.left = "50%"; e.style.left = "50%"; s.style.opacity = "1"; e.style.opacity = "1";
-    s.style.transform = "translate(-50%,-50%) scale(.4)"; e.style.transform = "translate(-50%,-50%) scale(.4)";
     f.style.left = "50%"; f.style.width = "0%"; f.style.opacity = "1";
-    void $("tlTrack").offsetWidth; // reflow so this is the animation's starting frame
-    var ease = "left .62s cubic-bezier(.32,.82,.28,1), transform .62s cubic-bezier(.32,.82,.28,1)";
+    sf.style.opacity = "0"; ef.style.opacity = "0";
+    void $("tlTrack").offsetWidth; // reflow so this is the animation's first frame
+    var ease = "left .7s cubic-bezier(.5,0,.2,1)"; // smooth ease-in-out, no abrupt jump
     s.style.transition = ease; e.style.transition = ease;
-    f.style.transition = "left .62s cubic-bezier(.32,.82,.28,1), width .62s cubic-bezier(.32,.82,.28,1)";
-    renderTimeline();  // real left/width
-    s.style.transform = "translate(-50%,-50%) scale(1)"; e.style.transform = "translate(-50%,-50%) scale(1)";
+    f.style.transition = "left .7s cubic-bezier(.5,0,.2,1), width .7s cubic-bezier(.5,0,.2,1)";
+    sf.style.transition = "opacity .45s ease .2s"; ef.style.transition = "opacity .45s ease .2s";
+    renderTimeline();  // real positions → the two circles slide out from the sides
+    sf.style.opacity = "1"; ef.style.opacity = "1";
     setTimeout(function () {
       s.style.transition = ""; e.style.transition = ""; f.style.transition = "";
-      s.style.transform = ""; e.style.transform = ""; s.style.opacity = ""; e.style.opacity = ""; f.style.opacity = "";
-    }, 700);
+      s.style.opacity = ""; e.style.opacity = ""; f.style.opacity = "";
+      sf.style.transition = ""; ef.style.transition = ""; sf.style.opacity = ""; ef.style.opacity = "";
+    }, 800);
   }
   function saveHero() {
     var existing = recordFor(state.selected);

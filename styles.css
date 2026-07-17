@@ -184,19 +184,21 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .tl-cap { font-size: .6rem; font-weight: 800; letter-spacing: .14em; color: var(--ink-soft); }
 .tl-time { font-size: 1.55rem; font-weight: 900; color: var(--hc); }
 
-/* record button — concentric on the line, same size as a handle, green */
+/* record button — concentric on the line, same size as a handle, green.
+   It stays put through the animation, morphing + → ✓ in place while the two
+   handles slide out from behind it. */
 .tl-fab {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 20;
-  width: 40px; height: 40px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+  width: 40px; height: 40px; border-radius: 50%; border: 4px solid var(--c-ok); padding: 0; cursor: pointer;
   display: grid; place-items: center; font-weight: 900; line-height: 1; font-size: 1.25rem;
   background: var(--c-ok); color: #fff;      /* confirm (editing): solid green ✓ */
   box-shadow: 0 4px 10px color-mix(in srgb, var(--c-ok) 45%, transparent);
-  transition: opacity .3s ease, transform .35s cubic-bezier(.3,.8,.3,1), background .25s ease, box-shadow .25s ease;
+  transition: background .3s ease, color .2s ease, box-shadow .3s ease, transform .35s cubic-bezier(.3,.8,.3,1);
 }
 .tl-fab:hover { filter: brightness(1.05); }
 .state-empty .tl-fab {              /* empty: white face, green ring, green + — like a handle */
-  background: var(--card); color: var(--c-ok); border: 4px solid var(--c-ok);
-  font-size: 1.55rem; box-shadow: 0 3px 8px rgba(43, 51, 61, .2);
+  background: var(--card); color: var(--c-ok); font-size: 1.55rem;
+  box-shadow: 0 3px 8px rgba(43, 51, 61, .2);
 }
 .recorded .tl-fab { display: none; }
 
