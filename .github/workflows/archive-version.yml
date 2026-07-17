@@ -1,0 +1,52 @@
+name: Archive version
+
+# When a version tag (v45, v46, …) is pushed, copy that tagged version of the
+# app into a permanent /vNN/ folder on the Pages branch and refresh the version
+# index. The site keeps serving the latest at the root, and every past version
+# stays live at /vNN/.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: archive-version
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the Pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: claude/sacrament-time-tracker-r1dkho
+          fetch-depth: 0
+
+      - name: Copy the tagged version into /vNN/
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"        # e.g. v45
+          VER="${TAG#v}"                  # e.g. 45
+          mkdir -p "v${VER}"
+          for f in index.html styles.css app.js config.js; do
+            git show "${TAG}:${f}" > "v${VER}/${f}"
+          done
+          bash scripts/gen-versions.sh
+
+      - name: Commit the archive if anything changed
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing new to archive for ${GITHUB_REF_NAME}."
+          else
+            git commit -m "Archive ${GITHUB_REF_NAME}"
+            git push origin HEAD:claude/sacrament-time-tracker-r1dkho
+          fi

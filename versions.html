@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sacrament Time Tracker — Versions</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:#efe7db; color:#2b333d; min-height:100vh; padding:40px 18px; }
+  @media (prefers-color-scheme: dark){ body{ background:#1c2027; color:#e7e2d8; } a.v{ background:#252a33; color:#e7e2d8; border-color:rgba(255,255,255,.08); } }
+  .wrap { max-width:560px; margin:0 auto; }
+  h1 { font-size:1.7rem; font-weight:900; letter-spacing:-.02em; margin:0 0 4px; }
+  p.sub { color:#7a828c; margin:0 0 26px; font-weight:600; }
+  a.latest { display:inline-block; margin-bottom:22px; font-weight:800; color:#fff;
+    background:linear-gradient(180deg,#2f8f6d,#267a5c); padding:12px 20px; border-radius:12px; text-decoration:none; box-shadow:0 4px 12px rgba(47,143,109,.3); }
+  ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  a.v { display:flex; align-items:center; justify-content:space-between; text-decoration:none; color:#2b333d;
+    background:#fff; border:1px solid rgba(43,51,61,.1); border-radius:12px; padding:15px 18px; font-weight:800;
+    box-shadow:0 2px 8px rgba(43,51,61,.08); transition:transform .12s, box-shadow .15s; }
+  a.v:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(43,51,61,.14); }
+  .tag { font-variant-numeric:tabular-nums; }
+  .badge { font-size:.72rem; font-weight:800; letter-spacing:.05em; color:#2f8f6d; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>⏱️ Version history</h1>
+    <p class="sub">Every released version of the Sacrament Time Tracker, kept live.</p>
+    <a class="latest" href="./">Open the latest (v45) →</a>
+    <ul>
+      <li><a class="v" href="v45/"><span class="tag">v45</span><span class="badge">LATEST</span></a></li>
+      <li><a class="v" href="v44/"><span class="tag">v44</span></a></li>
+      <li><a class="v" href="v43/"><span class="tag">v43</span></a></li>
+      <li><a class="v" href="v42/"><span class="tag">v42</span></a></li>
+      <li><a class="v" href="v41/"><span class="tag">v41</span></a></li>
+      <li><a class="v" href="v40/"><span class="tag">v40</span></a></li>
+      <li><a class="v" href="v39/"><span class="tag">v39</span></a></li>
+      <li><a class="v" href="v38/"><span class="tag">v38</span></a></li>
+      <li><a class="v" href="v37/"><span class="tag">v37</span></a></li>
+      <li><a class="v" href="v36/"><span class="tag">v36</span></a></li>
+      <li><a class="v" href="v35/"><span class="tag">v35</span></a></li>
+    </ul>
+  </div>
+</body>
+</html>
