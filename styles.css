@@ -230,12 +230,12 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .fab-arm.minute { transform: rotate(90deg); }   /* horizontal stroke */
 .fab-arm::before { content: ""; position: absolute; top: 100%; left: 0; width: 100%; height: 100%; background: currentColor; border-radius: 2px; transform-origin: 50% 0; transform: scaleY(1); }  /* the other half of the stroke */
 
-/* loading: shorten the arms into clock hands (hour short, minute long) with only
-   one half, and spin them; same 3px width as the + strokes */
-.tl-fab.loading .fab-arm.hour   { height: 7px; }
-.tl-fab.loading .fab-arm.minute { height: 11px; }
+/* loading: shorten the arms into clock hands (hour short, minute long), only one
+   half each, pivoting at the centre. Each spins on its own — the minute hand 60x
+   faster than the hour hand, like a real clock. 3px wide, matching the + strokes. */
+.tl-fab.loading .fab-arm.hour   { height: 7px;  animation: fabHand 72s linear infinite; }
+.tl-fab.loading .fab-arm.minute { height: 11px; animation: fabHand 1.2s linear infinite; }
 .tl-fab.loading .fab-arm::before { transform: scaleY(0); }
-.tl-fab.loading .fab-cp { animation: fabHand 1.2s linear infinite; } /* 300°/s = the clock's hand speed */
 
 /* settling: the hands grow their other halves and equalise length → become the +
    (the spin-down itself is driven from JS so it continues from the live angle) */
@@ -243,7 +243,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .tl-fab.settling .fab-arm::before { transition: transform .5s ease; }
 
 @keyframes fabHand { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .tl-fab.loading .fab-cp { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .tl-fab.loading .fab-arm { animation: none; } }
 
 .state-empty .tl-fab {   /* empty: white +, lifted up onto the timeline line */
   background: var(--card); color: var(--c-ok); font-size: 1.5rem;

@@ -265,26 +265,46 @@
   function finishFabLoading() {
     var fab = $("recordFab");
     if (!fab.classList.contains("loading")) return;
-    var cp = fab.querySelector(".fab-cp");
-    // read the clock's live angle so the spin-down continues without a jump
-    var m = new DOMMatrix(getComputedStyle(cp).transform);
-    var start = Math.atan2(m.b, m.a) * 180 / Math.PI;
+    var hour = fab.querySelector(".fab-arm.hour");
+    var minute = fab.querySelector(".fab-arm.minute");
+    // read each hand's live angle so its spin-down continues without a jump
+    function angleOf(el) {
+      var m = new DOMMatrix(getComputedStyle(el).transform);
+      return Math.atan2(m.b, m.a) * 180 / Math.PI;
+    }
+    var hStart = angleOf(hour), mStart = angleOf(minute);
     fab.classList.remove("loading");
-    fab.classList.add("settling");           // arms grow into the +
-    if (prefersReduced()) { fab.classList.remove("settling"); return; }
-    cp.style.animation = "none";
-    // keep the clock's 300°/s for ~0.3s, then ease to a stop on a quarter-turn
-    var SPEED = 300, P1 = 300, P2 = 700;
-    var mid = start + SPEED * (P1 / 1000);
-    var target = Math.round((mid + 105) / 90) * 90; // 90°-multiple → upright +
+    fab.classList.add("settling");           // arms grow their other half → full + strokes
+    if (prefersReduced()) {
+      fab.classList.remove("settling");
+      hour.style.transform = ""; minute.style.transform = "";
+      return;
+    }
+    hour.style.animation = "none"; minute.style.animation = "none";
+    // each hand keeps its own speed for P1, then eases to a stop forming the +.
+    // minute lands horizontal (≡90° mod 180), hour lands vertical (≡0° mod 180),
+    // so they're perpendicular and match the rest state seamlessly on clear.
+    var P1 = 300, P2 = 700, mSpeed = 300, hSpeed = 5;   // deg/s, matching the CSS
+    var mMid = mStart + mSpeed * (P1 / 1000);
+    var hMid = hStart + hSpeed * (P1 / 1000);
+    var mTarget = Math.round((mMid - 90) / 180) * 180 + 90;
+    if (mTarget < mMid) mTarget += 180;                 // always finish forward
+    var hTarget = Math.round(hMid / 180) * 180;         // nearest vertical to its momentum
+    function ease(a, b, p) { return a + (b - a) * (1 - Math.pow(1 - p, 2)); }
     var t0 = null;
     function frame(ts) {
       if (t0 === null) t0 = ts;
-      var t = ts - t0, deg;
-      if (t <= P1) deg = start + SPEED * (t / 1000);
-      else if (t <= P1 + P2) deg = mid + (target - mid) * (1 - Math.pow(1 - (t - P1) / P2, 2));
-      else { cp.style.transform = "rotate(" + target + "deg)"; fab.classList.remove("settling"); cp.style.transform = ""; cp.style.animation = ""; return; }
-      cp.style.transform = "rotate(" + deg + "deg)";
+      var t = ts - t0, hd, md;
+      if (t <= P1) { hd = hStart + hSpeed * (t / 1000); md = mStart + mSpeed * (t / 1000); }
+      else if (t <= P1 + P2) { var p = (t - P1) / P2; hd = ease(hMid, hTarget, p); md = ease(mMid, mTarget, p); }
+      else {
+        fab.classList.remove("settling");
+        hour.style.transform = ""; minute.style.transform = "";
+        hour.style.animation = ""; minute.style.animation = "";
+        return;
+      }
+      hour.style.transform = "rotate(" + hd + "deg)";
+      minute.style.transform = "rotate(" + md + "deg)";
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
