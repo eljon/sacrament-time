@@ -58,17 +58,16 @@
         <input type="hidden" id="end" />
         <input type="hidden" id="notes" />
 
-        <!-- recorded view: the saved verdict comment with an edit pencil beside it -->
-        <div class="recorded-head" id="recHead" hidden>
-          <p class="recorded-verdict" id="recVerdict"></p>
-          <button type="button" class="rec-edit" id="recEditBtn" aria-label="Edit this week">✎</button>
-        </div>
-        <p class="recorded-notes" id="recNotes" hidden></p>
-
         <div class="hero-controls">
+          <!-- recorded view: the verdict comment + edit pencil, sitting on the very
+               same line the ✓ was on, so the ✓ just slides sideways into the pencil -->
+          <div class="recorded-head" id="recHead" hidden>
+            <p class="recorded-verdict" id="recVerdict"></p>
+            <button type="button" class="rec-edit" id="recEditBtn" aria-label="Edit this week">✎</button>
+          </div>
           <!-- the + starts up on the timeline; on tap it drops here and the two
                satellites (cancel · notes) slide out from it. On save the ✓ turns
-               back into the spinning clock, then settles into the verdict above. -->
+               back into the spinning clock, then slides sideways into the verdict. -->
           <div class="tl-cluster">
             <button type="button" class="tl-ctl del" id="delBtn" aria-label="Delete this week">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 20 7"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12"/><line x1="10" y1="11" x2="10" y2="16"/><line x1="14" y1="11" x2="14" y2="16"/></svg>
@@ -83,6 +82,7 @@
             </button>
           </div>
         </div>
+        <p class="recorded-notes" id="recNotes" hidden></p>
       </form>
     </section>
 

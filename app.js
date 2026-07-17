@@ -5,7 +5,7 @@
   "use strict";
 
   // Bumped every commit (each commit is a new version).
-  var APP_VERSION = 39;
+  var APP_VERSION = 40;
 
   var DEFAULTS = window.APP_CONFIG || {};
   var LS_CONFIG = "stt.config";
@@ -381,18 +381,15 @@
     // the ✓ turns back into the spinning clock while the save is in flight
     var animate = !prefersReduced();
     if (animate) { fab.classList.remove("as-check"); startFabLoading(); }
-    var t0 = Date.now();
     var op = rec.id ? updateRecord(rec) : addRecord(rec);
     op.then(function () {
+      // stop the clock the instant the record lands, and slide it into the pencil
       state.heroMode = "auto"; state.armed = false;
-      var wait = animate ? Math.max(0, 700 - (Date.now() - t0)) : 0;
-      setTimeout(function () {
-        fab.classList.remove("loading", "settling"); fab.disabled = false;
-        var fromRect = animate ? fab.getBoundingClientRect() : null;   // ✓ position
-        renderAll();   // → recorded view: the clock settles into the verdict comment
-        if (animate) flipEditIn(fromRect);   // ✓ slides right and becomes the edit pencil
-        toast(existing ? "Week updated" : "Week recorded");
-      }, wait);
+      fab.classList.remove("loading", "settling"); fab.disabled = false;
+      var fromRect = animate ? fab.getBoundingClientRect() : null;   // ✓ position
+      renderAll();   // → recorded view: verdict comment appears on the ✓'s line
+      if (animate) flipEditIn(fromRect);   // ✓ slides sideways and becomes the edit pencil
+      toast(existing ? "Week updated" : "Week recorded");
     }).catch(function (err) {
       fab.classList.remove("loading", "settling"); fab.disabled = false;
       renderHeroBody();   // restore the ✓ so the user can retry
@@ -404,14 +401,14 @@
   function flipEditIn(fromRect) {
     if (!fromRect) return;
     var btn = $("recEditBtn"), to = btn.getBoundingClientRect();
+    // horizontal only — the pencil sits on the same line the ✓ did
     var dx = (fromRect.left + fromRect.width / 2) - (to.left + to.width / 2);
-    var dy = (fromRect.top + fromRect.height / 2) - (to.top + to.height / 2);
-    if (!isFinite(dx) || !isFinite(dy) || (Math.abs(dx) < 1 && Math.abs(dy) < 1)) return;
+    if (!isFinite(dx) || Math.abs(dx) < 1) return;
     btn.style.transition = "none";
-    btn.style.transform = "translate(" + dx + "px," + dy + "px)";
+    btn.style.transform = "translateX(" + dx + "px)";
     void btn.offsetWidth;                 // commit the start position
     btn.style.transition = "transform .5s cubic-bezier(.4,0,.2,1)";
-    btn.style.transform = "translate(0,0)";
+    btn.style.transform = "translateX(0)";
     var clear = function () { btn.style.transition = ""; btn.style.transform = ""; btn.removeEventListener("transitionend", clear); };
     btn.addEventListener("transitionend", clear);
   }

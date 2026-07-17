@@ -213,10 +213,9 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   border: 0; padding: 0; cursor: pointer; display: grid; place-items: center;
   font-weight: 900; line-height: 1;
 }
-/* recorded: the cluster fades out as the verdict comment settles in, while the
-   ✓ slides right and shrinks — the edit pencil glides in from where it was (JS FLIP) */
-.recorded .tl-cluster { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .3s ease, visibility 0s .3s; }
-.recorded .tl-fab { transform: translate(calc(-50% + 34px), -50%) scale(.82); }
+/* recorded: the ✓ fades quickly while the edit pencil glides sideways in from
+   exactly where it was (JS FLIP), so the check reads as sliding into the pencil. */
+.recorded .tl-cluster { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .2s ease, visibility 0s .2s; }
 
 /* save / record button (+ ↔ ✓) */
 .tl-fab {
@@ -333,10 +332,11 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .recorded .tl-track::before { opacity: 0; }
 .recorded .tl-handle { cursor: default; box-shadow: 0 2px 5px rgba(43,51,61,.16); }
 .recorded .tl-axis { opacity: 0; pointer-events: none; }
-/* recorded view: verdict comment + an edit pencil beside it */
-.recorded-head { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 18px; }
+/* recorded view: verdict comment + edit pencil, centred on the same line the
+   controls sat on (so the ✓ slides horizontally into the pencil) */
+.recorded-head { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; gap: 12px; }
 .recorded-head[hidden] { display: none; }
-.recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; animation: recIn .4s ease both; }
+.recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; animation: recIn .45s ease both; }
 .rec-edit {
   flex: none; width: 30px; height: 30px; border-radius: 50%;
   border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
@@ -345,9 +345,9 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 }
 .rec-edit:hover { color: var(--brand); border-color: var(--brand); }
 .rec-edit:active { transform: scale(.94); }
-@keyframes recIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes recIn { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .recorded-verdict { animation: none; } }
-.recorded-notes { text-align: center; color: var(--ink-soft); font-weight: 600; margin-top: 4px; font-style: italic; }
+.recorded-notes { text-align: center; color: var(--ink-soft); font-weight: 600; margin-top: 10px; font-style: italic; }
 
 /* STATS */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
