@@ -386,6 +386,9 @@
     for (var i = 1; i < STOPS.length; i++) {
       if (dev <= STOPS[i].m) {
         var t = (dev - STOPS[i - 1].m) / (STOPS[i].m - STOPS[i - 1].m);
+        // ease the first (green→yellow) segment so even 1 minute late leaves
+        // green and reads yellow, while still hitting full yellow at 3 min
+        if (i === 1) t = Math.pow(t, 0.28);
         return rgb(mixColor(STOPS[i - 1].c, STOPS[i].c, t));
       }
     }
