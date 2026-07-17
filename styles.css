@@ -23,8 +23,8 @@
   --partial: #cf8a3c;
   /* lateness scale: green → yellow (3 min) → orange (6 min) → red (10 min) */
   --c-ok: #2f8f6d;
-  --c-yellow: #d4a017;
-  --c-orange: #d97706;
+  --c-yellow: #f1c40f;
+  --c-orange: #e8791a;
   --c-red: #c0563f;
   --tint: #eef4f6;        /* recorded / selected tint */
   --tint-line: #d9e6ea;
@@ -55,8 +55,8 @@
     --late-line: #543528;
     --partial: #d99a4f;
     --c-ok: #56b389;
-    --c-yellow: #e6b53a;
-    --c-orange: #e8893f;
+    --c-yellow: #f4d03f;
+    --c-orange: #ef9245;
     --c-red: #db7a5f;
     --tint: #22302f;
     --tint-line: #33474a;
