@@ -65,7 +65,10 @@
 }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+/* Always reserve the scrollbar's space so the layout doesn't shift sideways
+   when the page grows tall enough to need one (e.g. after data loads). */
+html { -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; }
+@supports not (scrollbar-gutter: stable) { html { overflow-y: scroll; } }
 body {
   margin: 0; font-family: var(--font); color: var(--ink); line-height: 1.5;
   background: linear-gradient(180deg, var(--bg1), var(--bg2));
