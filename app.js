@@ -34,7 +34,10 @@
   }
 
   var cfg = loadConfig();
-  var state = { records: [], loading: false, selected: null, heroMode: "auto", slider: null, dragging: null };
+  var state = {
+    records: [], loading: false, selected: null, heroMode: "auto", slider: null, dragging: null,
+    cf: { pos: 0, vel: 0, target: null, dragging: false, raf: null, startX: 0, startPos: 0, lastX: 0, vpx: 0, moved: false },
+  };
 
   // ---- Time helpers ---------------------------------------------------------
   function toMin(hhmm) {
@@ -208,12 +211,17 @@
   //    changes how it looks and whether the handles respond. --
   function renderHero() {
     if (!state.selected) state.selected = mostRecentSunday();
+    // snap the cover flow to the selected week, then render the body
+    if (state.sundays) {
+      var idx = state.sundays.indexOf(state.selected);
+      if (idx >= 0) { state.cf.target = null; state.cf.vel = 0; state.cf.pos = idx; cfStopRaf(); }
+      cfLayout();
+    }
+    renderHeroBody();
+  }
+  function renderHeroBody() {
     var sel = state.selected;
     var rec = recordFor(sel);
-    var today = mostRecentSunday();
-
-    renderCoverflow();
-    $("weekCaption").textContent = sel === today ? "This Sunday" : "";
 
     var editing = state.heroMode === "edit" || (state.heroMode === "auto" && !rec);
     state.editing = editing;
@@ -352,9 +360,12 @@
   function goToWeek(date) { state.selected = date; state.heroMode = "auto"; renderHero(); }
   function scrollToHero() { document.querySelector(".hero").scrollIntoView({ behavior: "smooth", block: "start" }); }
 
-  // ---- Cover Flow date picker -----------------------------------------------
-  var CF_RANGE = 104;   // Sundays of history to make available (~2 years)
-  var CF_WINDOW = 4;    // how many cards fan out on each side of centre
+  // ---- Cover Flow date picker (drag + kinetic momentum) ---------------------
+  var CF_RANGE = 104;      // Sundays of history to make available (~2 years)
+  var CF_WINDOW = 4;       // how many cards fan out on each side of centre
+  var CF_STEP = 64;        // px of drag that advances one card
+  var CF_FRICTION = 0.93;  // momentum decay per frame
+
   function buildCoverflow() {
     var track = $("cfTrack"); track.innerHTML = "";
     state.sundays = []; state.cardEls = {};
@@ -366,6 +377,7 @@
       track.appendChild(el);
       state.cardEls[dt] = el;
     }
+    state.cf.pos = state.sundays.length - 1;      // start on today
   }
   function calCard(dateStr) {
     var d = parseYMD(dateStr);
@@ -374,46 +386,98 @@
     el.setAttribute("aria-label", MON[d.getMonth()] + " " + d.getDate());
     el.innerHTML = '<span class="cal-top">' + MON[d.getMonth()].toUpperCase() + '</span>' +
       '<span class="cal-day">' + d.getDate() + '</span><span class="cal-dot"></span>';
-    el.addEventListener("click", function () { if (!state.cfMoved) goToWeek(dateStr); });
+    el.addEventListener("click", function () {
+      if (state.cf.moved) return;                 // was a drag, not a tap
+      var idx = state.sundays.indexOf(dateStr);
+      if (idx >= 0) animateTo(idx);
+    });
     return el;
   }
-  function renderCoverflow() {
+
+  function cfMax() { return state.sundays.length - 1; }
+  function clampPos(p) { return Math.max(0, Math.min(cfMax(), p)); }
+
+  // Lay out every card from the fractional scroll position — smooth through 0
+  // so the fan animates continuously as you drag.
+  function cfLayout() {
     if (!state.sundays) return;
-    var idx = state.sundays.indexOf(state.selected);
-    if (idx < 0) return;
-    $("prevWeek").disabled = idx <= 0;
-    $("nextWeek").disabled = idx >= state.sundays.length - 1;
+    var pos = state.cf.pos, center = Math.round(clampPos(pos));
     for (var i = 0; i < state.sundays.length; i++) {
-      positionCard(state.cardEls[state.sundays[i]], i - idx, state.sundays[i]);
+      applyCard(state.cardEls[state.sundays[i]], i - pos, i === center, state.sundays[i]);
     }
+    $("weekCaption").textContent = state.sundays[center] === mostRecentSunday() ? "This Sunday" : "";
   }
-  function positionCard(el, o, dateStr) {
-    var abso = Math.abs(o), dir = o < 0 ? -1 : 1;
-    if (o === 0) {
-      el.style.transform = "translateX(0) rotateY(0deg) scale(1)";
-      el.style.opacity = "1"; el.style.zIndex = "100"; el.style.pointerEvents = "auto";
-      el.classList.add("is-center");
-    } else if (abso > CF_WINDOW) {
-      el.style.transform = "translateX(" + (dir * 190) + "px) rotateY(" + (-dir * 58) + "deg) scale(.7)";
-      el.style.opacity = "0"; el.style.zIndex = "0"; el.style.pointerEvents = "none";
-      el.classList.remove("is-center");
-    } else {
-      var x = dir * (46 + (abso - 1) * 24);
-      el.style.transform = "translateX(" + x + "px) rotateY(" + (-dir * 54) + "deg) scale(.86)";
-      el.style.opacity = String(Math.max(0, 1 - abso * 0.18));
-      el.style.zIndex = String(100 - abso); el.style.pointerEvents = "auto";
-      el.classList.remove("is-center");
+  function applyCard(el, o, isCenter, dateStr) {
+    var ao = Math.abs(o), s = o < 0 ? -1 : 1;
+    if (ao > CF_WINDOW + 0.5) {
+      el.style.opacity = "0"; el.style.pointerEvents = "none"; el.style.zIndex = "0";
+      el.style.transform = "translateX(" + (s * 230) + "px) rotateY(" + (-s * 58) + "deg) scale(.7)";
+      el.classList.remove("is-center"); setDot(el, dateStr); return;
     }
-    // status dot for logged weeks
-    var dot = el.querySelector(".cal-dot");
-    var rec = recordFor(dateStr);
+    var cl = Math.min(ao, 1);
+    var near = 52, far = 22;
+    var x = ao <= 1 ? o * near : s * (near + (ao - 1) * far);
+    var transform = "translateX(" + x + "px) translateZ(" + ((1 - cl) * 52) + "px) " +
+      "rotateY(" + (-s * 50 * cl) + "deg) scale(" + (1 - cl * 0.16) + ")";
+    el.style.transform = transform;
+    el.style.opacity = String(ao <= 1 ? 1 : Math.max(0, 1 - (ao - 1) * 0.24));
+    el.style.zIndex = String(1000 - Math.round(ao * 10));
+    el.style.pointerEvents = "auto";
+    el.classList.toggle("is-center", isCenter);
+    setDot(el, dateStr);
+  }
+  function setDot(el, dateStr) {
+    var dot = el.querySelector(".cal-dot"), rec = recordFor(dateStr);
     if (rec) { var a = analyze(rec); dot.style.background = lateColor(Math.max(a.startDev || 0, a.endDev || 0)); }
     else dot.style.background = "transparent";
   }
-  function stepWeek(dir) {
-    if (!state.sundays) return;
-    var ni = state.sundays.indexOf(state.selected) + dir;
-    if (ni >= 0 && ni < state.sundays.length) goToWeek(state.sundays[ni]);
+
+  // rAF engine: free momentum until slow, then ease-snap to the nearest card.
+  function cfEnsureRaf() { if (!state.cf.raf) state.cf.raf = requestAnimationFrame(cfTick); }
+  function cfStopRaf() { if (state.cf.raf) { cancelAnimationFrame(state.cf.raf); state.cf.raf = null; } }
+  function cfTick() {
+    var cf = state.cf;
+    if (cf.dragging) { cf.raf = null; return; }
+    if (cf.target != null) {
+      cf.pos += (cf.target - cf.pos) * 0.2;
+      if (Math.abs(cf.target - cf.pos) < 0.003) { cf.pos = cf.target; cf.target = null; cf.vel = 0; cfLayout(); cfFinalize(); cf.raf = null; return; }
+    } else {
+      cf.pos += cf.vel; cf.vel *= CF_FRICTION;
+      if (cf.pos < 0) { cf.pos = 0; cf.vel = 0; } else if (cf.pos > cfMax()) { cf.pos = cfMax(); cf.vel = 0; }
+      if (Math.abs(cf.vel) < 0.02) cf.target = clampPos(Math.round(cf.pos)); // begin snap
+    }
+    cfLayout();
+    cf.raf = requestAnimationFrame(cfTick);
+  }
+  function cfFinalize() {
+    var ci = clampPos(Math.round(state.cf.pos));
+    state.selected = state.sundays[ci];
+    renderHeroBody();
+  }
+  function animateTo(idx) { state.heroMode = "auto"; state.cf.target = clampPos(idx); state.cf.vel = 0; cfEnsureRaf(); }
+
+  function cfDown(e) {
+    var cf = state.cf; cfStopRaf();
+    cf.dragging = true; cf.target = null; cf.vel = 0; cf.moved = false;
+    cf.startX = e.clientX; cf.startPos = cf.pos; cf.lastX = e.clientX; cf.vpx = 0;
+    state.heroMode = "auto";
+  }
+  function cfMove(e) {
+    var cf = state.cf; if (!cf.dragging) return;
+    var dx = e.clientX - cf.startX;
+    if (Math.abs(dx) > 5) cf.moved = true;
+    cf.pos = clampPos(cf.startPos - dx / CF_STEP);
+    cf.vpx = e.clientX - cf.lastX; cf.lastX = e.clientX;
+    cfLayout();
+  }
+  function cfUp() {
+    var cf = state.cf; if (!cf.dragging) return;
+    cf.dragging = false;
+    if (!cf.moved) { cf.target = clampPos(Math.round(cf.pos)); cfEnsureRaf(); return; }
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) { cf.pos = clampPos(Math.round(cf.pos)); cfLayout(); cfFinalize(); return; }
+    cf.vel = -cf.vpx / CF_STEP;   // carry the flick into momentum
+    cfEnsureRaf();
   }
 
   // ---- Timeline slider ------------------------------------------------------
@@ -621,18 +685,12 @@
     document.addEventListener("pointerup", function () { state.dragging = null; });
     $("tlStart").addEventListener("keydown", function (e) { onTimelineKey("start", e); });
     $("tlEnd").addEventListener("keydown", function (e) { onTimelineKey("end", e); });
-    $("prevWeek").addEventListener("click", function () { stepWeek(-1); });
-    $("nextWeek").addEventListener("click", function () { stepWeek(1); });
-    // swipe the cover flow (drag right → older, left → newer)
-    var cf = $("coverflow"), cfStart = null;
-    cf.addEventListener("pointerdown", function (e) { cfStart = e.clientX; state.cfMoved = false; });
-    cf.addEventListener("pointermove", function (e) { if (cfStart != null && Math.abs(e.clientX - cfStart) > 8) state.cfMoved = true; });
-    cf.addEventListener("pointerup", function (e) {
-      if (cfStart == null) return;
-      var dx = e.clientX - cfStart; cfStart = null;
-      if (dx <= -40) stepWeek(1); else if (dx >= 40) stepWeek(-1);
-    });
-    cf.addEventListener("pointerleave", function () { cfStart = null; });
+    // cover flow: drag with finger/mouse, release for kinetic momentum
+    var cf = $("coverflow");
+    cf.addEventListener("pointerdown", function (e) { cfDown(e); });
+    document.addEventListener("pointermove", function (e) { if (state.cf.dragging) cfMove(e); });
+    document.addEventListener("pointerup", function () { if (state.cf.dragging) cfUp(); });
+    document.addEventListener("pointercancel", function () { if (state.cf.dragging) cfUp(); });
     $("editBtn").addEventListener("click", function () { state.heroMode = "edit"; renderHero(); });
     $("cancelEditBtn").addEventListener("click", function () { state.heroMode = "auto"; renderHero(); });
     $("clearBtn").addEventListener("click", function () { var r = recordFor(state.selected); if (r) confirmDelete(r); });

@@ -18,9 +18,10 @@ in your browser (`localStorage`).
 
 The entry card sits at the top. Pick a Sunday from the **Cover Flow** of
 calendar cards — the selected week sits centred and forward-facing, previous
-weeks fan back to the left. Tap a card, swipe, or use the **‹ ›** arrows to move
-(you can't go past this Sunday). Logged weeks show a small status dot coloured by
-how on-time they were.
+weeks fan back to the left. Drag with a finger or the mouse to scroll; a flick
+carries kinetic momentum and snaps to the nearest week, or tap any card to glide
+it to centre (you can't go past this Sunday). Logged weeks show a small status
+dot coloured by how on-time they were.
 
 Set the times on the **meeting timeline** — a line running 1:00 → 3:00 PM with
 dashed goal marks at 1:30 and 2:30. Drag the two handles (start and end) in

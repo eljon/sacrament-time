@@ -128,7 +128,8 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .week-nav { margin-bottom: 14px; }
 
 /* Cover Flow calendar picker */
-.coverflow { position: relative; height: 104px; perspective: 720px; overflow: hidden; }
+.coverflow { position: relative; height: 104px; perspective: 720px; overflow: hidden; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.coverflow:active { cursor: grabbing; }
 .cf-track { position: absolute; inset: 0; transform-style: preserve-3d; }
 .cal {
   position: absolute; left: 50%; top: 50%; width: 62px; height: 74px;
@@ -136,7 +137,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   background: var(--card); border-radius: 13px; overflow: hidden;
   display: flex; flex-direction: column; transform-origin: 50% 50%;
   box-shadow: 0 6px 16px rgba(43, 51, 61, .18);
-  transition: transform .46s cubic-bezier(.26,.72,.24,1), opacity .34s ease, box-shadow .3s ease;
+  transition: box-shadow .3s ease;  /* motion is driven per-frame by the rAF engine */
   will-change: transform, opacity; backface-visibility: hidden;
 }
 .cal-top { background: var(--accent); color: #fff; font-size: .56rem; font-weight: 800; letter-spacing: .1em; text-align: center; padding: 3px 0 2px; }
@@ -145,20 +146,7 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .cal.is-center { box-shadow: 0 12px 26px rgba(43, 51, 61, .3); }
 .cal.is-center .cal-day { color: var(--brand); }
 
-.nav-arrow {
-  position: absolute; top: 50%; transform: translateY(-50%); z-index: 60;
-  border: 1px solid var(--line); background: color-mix(in srgb, var(--card) 82%, transparent);
-  backdrop-filter: blur(3px); color: var(--brand);
-  width: 38px; height: 38px; border-radius: 11px; font-size: 1.3rem; font-weight: 800;
-  line-height: 1; cursor: pointer; transition: background .15s, color .15s, border-color .15s, opacity .15s;
-}
-.nav-arrow.left { left: 2px; }
-.nav-arrow.right { right: 2px; }
-.nav-arrow:hover { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
-.nav-arrow:disabled { opacity: .28; cursor: not-allowed; background: color-mix(in srgb, var(--card) 82%, transparent); color: var(--brand); border-color: var(--line); }
 .week-caption { text-align: center; font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); min-height: 1em; margin-top: 4px; }
-
-@media (prefers-reduced-motion: reduce) { .cal { transition: opacity .2s ease; } }
 
 /* the timeline slider — the time lives on each handle ("the picker") */
 .timeline { margin-top: 6px; padding: 62px 22px 0; }
