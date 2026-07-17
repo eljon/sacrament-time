@@ -5,7 +5,7 @@
   "use strict";
 
   // Bumped every commit (each commit is a new version).
-  var APP_VERSION = 44;
+  var APP_VERSION = 45;
 
   var DEFAULTS = window.APP_CONFIG || {};
   var LS_CONFIG = "stt.config";
@@ -282,8 +282,22 @@
 
   function prefersReduced() { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
 
-  // record button loading animation: spinning clock → hands morph into + → stop
-  function startFabLoading() { $("recordFab").classList.add("loading"); }
+  // record button loading animation: spinning clock → hands morph into + → stop.
+  // Easter egg: the clock doesn't start at 12 — it starts at the actual system
+  // time, then spins. A negative animation-delay offsets each hand's spin so it
+  // *begins* at the current hour/minute angle (periods match the CSS: 7.2s / 0.6s).
+  function startFabLoading() {
+    var fab = $("recordFab");
+    var now = new Date();
+    var mins = now.getMinutes(), hrs = now.getHours() % 12;
+    var minuteAngle = mins * 6;                  // 6° per minute
+    var hourAngle = hrs * 30 + mins * 0.5;       // 30° per hour, plus the within-hour drift
+    var hourEl = fab.querySelector(".fab-arm.hour");
+    var minEl = fab.querySelector(".fab-arm.minute");
+    hourEl.style.animationDelay = (-(hourAngle / 360) * 7.2).toFixed(3) + "s";
+    minEl.style.animationDelay = (-(minuteAngle / 360) * 0.6).toFixed(3) + "s";
+    fab.classList.add("loading");
+  }
   function finishFabLoading() {
     var fab = $("recordFab");
     if (!fab.classList.contains("loading")) return;
@@ -300,6 +314,7 @@
     if (prefersReduced()) {
       fab.classList.remove("settling");
       hour.style.transform = ""; minute.style.transform = "";
+      hour.style.animationDelay = ""; minute.style.animationDelay = "";
       return;
     }
     hour.style.animation = "none"; minute.style.animation = "none";
@@ -323,6 +338,7 @@
         fab.classList.remove("settling");
         hour.style.transform = ""; minute.style.transform = "";
         hour.style.animation = ""; minute.style.animation = "";
+        hour.style.animationDelay = ""; minute.style.animationDelay = "";
         return;
       }
       hour.style.transform = "rotate(" + hd + "deg)";
