@@ -240,7 +240,7 @@
     setHandlesInteractive(isEditing);
 
     var fab = $("recordFab");
-    fab.textContent = isEmpty ? "+" : "✓";
+    $("fabGlyph").textContent = isEmpty ? "+" : "✓";
     fab.setAttribute("aria-label", isEmpty ? "Record this week" : "Save");
     $("notesBtn").classList.toggle("has-note", !!$("notes").value);
 
@@ -258,6 +258,17 @@
   }
 
   function prefersReduced() { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+
+  // record button loading animation: spinning clock → merge into + → settle
+  function startFabLoading() { $("recordFab").classList.add("loading"); }
+  function finishFabLoading() {
+    var fab = $("recordFab");
+    if (!fab.classList.contains("loading")) return;
+    fab.classList.remove("loading");
+    if (prefersReduced()) return;
+    fab.classList.add("settling");
+    setTimeout(function () { fab.classList.remove("settling"); }, 740);
+  }
 
   // tap the record button on an empty week → the whole timeline (lane, ticks,
   // handles, fill, axis labels) unfolds outward from the centre button, which
@@ -779,10 +790,13 @@
     $("cfgSaveBtn").addEventListener("click", saveSettings);
     $("cfgCancelBtn").addEventListener("click", function () { $("settingsDialog").close(); });
 
+    startFabLoading();
+    var t0 = Date.now();
     renderAll();
     positionFab();
     setTimeout(positionFab, 120); // re-measure once fonts/layout settle
-    loadRecords().then(renderAll).catch(function (err) { toast("Could not load: " + err.message); renderAll(); });
+    loadRecords().then(renderAll).catch(function (err) { toast("Could not load: " + err.message); renderAll(); })
+      .finally(function () { setTimeout(finishFabLoading, Math.max(0, 700 - (Date.now() - t0))); });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

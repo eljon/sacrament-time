@@ -31,7 +31,7 @@
 
       <!-- the meeting timeline is always shown; a "recorded" class flips it
            from an editable slider to a read-only record display -->
-      <form id="heroInput" novalidate>
+      <form id="heroInput" class="state-empty" novalidate>
         <div class="timeline">
           <div class="tl-track" id="tlTrack">
             <span class="tl-tick t1"></span>
@@ -65,7 +65,13 @@
                satellites (cancel · notes) slide out from it -->
           <div class="tl-cluster">
             <button type="button" class="tl-ctl x" id="cancelBtn" aria-label="Cancel">✕</button>
-            <button type="button" class="tl-fab" id="recordFab" aria-label="Record this week">+</button>
+            <button type="button" class="tl-fab" id="recordFab" aria-label="Record this week">
+              <span class="fab-glyph" id="fabGlyph">+</span>
+              <span class="fab-anim" aria-hidden="true">
+                <span class="fab-clock"><i class="fab-hand hour"></i><i class="fab-hand minute"></i></span>
+                <span class="fab-plus"></span>
+              </span>
+            </button>
             <button type="button" class="tl-ctl notes" id="notesBtn" aria-label="Add a note">✎</button>
           </div>
           <div class="hero-actions">

@@ -214,6 +214,36 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
   transition: transform .55s cubic-bezier(.4,0,.2,1), background .3s ease, color .2s ease, box-shadow .3s ease;
 }
 .tl-fab:hover { filter: brightness(1.05); }
+
+/* loading animation: a spinning clock that merges into the + */
+.fab-glyph { transition: opacity .15s ease; }
+.tl-fab.loading .fab-glyph, .tl-fab.settling .fab-glyph { opacity: 0; }
+.fab-anim { display: none; position: absolute; inset: 0; }
+.tl-fab.loading .fab-anim, .tl-fab.settling .fab-anim { display: block; }
+.tl-fab.settling .fab-anim { animation: fabSettle .72s forwards; }
+.fab-clock { position: absolute; inset: 0; }
+.tl-fab.settling .fab-clock { opacity: 0; transition: opacity .16s ease; }
+.fab-hand { position: absolute; left: 50%; bottom: 50%; background: currentColor; border-radius: 2px; transform-origin: 50% 100%; }
+.fab-hand.hour { width: 3px; height: 8px; margin-left: -1.5px; }
+.fab-hand.minute { width: 2px; height: 12px; margin-left: -1px; }
+.tl-fab.loading .fab-hand.hour { animation: fabHand .5s linear infinite; }
+.tl-fab.loading .fab-hand.minute { animation: fabHand .12s linear infinite; }
+.fab-plus { position: absolute; inset: 0; opacity: 0; }
+.tl-fab.settling .fab-plus { opacity: 1; transition: opacity .16s ease; }
+.fab-plus::before, .fab-plus::after { content: ""; position: absolute; left: 50%; top: 50%; background: currentColor; border-radius: 2px; transform: translate(-50%, -50%); }
+.fab-plus::before { width: 3px; height: 18px; }
+.fab-plus::after { width: 18px; height: 3px; }
+@keyframes fabHand { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes fabSettle {
+  0%   { transform: rotate(0deg);    animation-timing-function: linear; }         /* fast constant spin… */
+  42%  { transform: rotate(720deg);  animation-timing-function: cubic-bezier(.15,.7,.25,1); } /* …for ~0.3s */
+  100% { transform: rotate(1080deg); }                                            /* then decelerate to a stop, upright */
+}
+@media (prefers-reduced-motion: reduce) {
+  .tl-fab.loading .fab-hand { animation: none; }
+  .tl-fab.settling .fab-anim { animation: none; }
+}
+
 .state-empty .tl-fab {   /* empty: white +, lifted up onto the timeline line */
   background: var(--card); color: var(--c-ok); font-size: 1.5rem;
   box-shadow: 0 3px 8px rgba(43,51,61,.2);
