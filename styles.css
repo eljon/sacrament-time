@@ -150,14 +150,20 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 /* the timeline slider — the time lives on each handle ("the picker") */
 .timeline { margin-top: 6px; padding: 62px 22px 0; }
 .tl-track {
-  position: relative; height: 16px; border-radius: 999px; background: var(--line-soft);
-  border: 1px solid var(--line); touch-action: none;
+  position: relative; height: 16px; border-radius: 999px; background: transparent; touch-action: none;
+}
+.tl-track::before {   /* the cream lane — scales out from the centre while forming */
+  content: ""; position: absolute; inset: 0; border-radius: 999px;
+  background: var(--line-soft); border: 1px solid var(--line);
+  transform: scaleX(1); transform-origin: center;
 }
 .tl-fill {
   position: absolute; top: -1px; bottom: -1px; left: 25%; width: 50%; border-radius: 999px;
   background: var(--c-ok); /* replaced at runtime with a start-to-end gradient */
 }
 .tl-tick { position: absolute; top: 50%; width: 0; height: 30px; transform: translate(-50%, -50%); border-left: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent); }
+.tl-tick.t1 { left: 25%; }
+.tl-tick.t2 { left: 75%; }
 .tl-handle {
   --hc: var(--brand);
   position: absolute; top: 50%; left: 25%; width: 40px; height: 40px; transform: translate(-50%, -50%);
@@ -202,19 +208,24 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 }
 .recorded .tl-fab { display: none; }
 
-/* smooth fades between empty / editing / recorded */
-.tl-track { transition: background-color .35s ease, border-color .35s ease; }
-.tl-fill, .tl-tick { transition: opacity .35s ease; }
-.tl-handle { transition: opacity .35s ease, box-shadow .15s, border-color .15s; }
-.tl-axis, .tl-help { transition: opacity .3s ease; }
+/* the whole timeline unfolds from the centre button when a week is armed.
+   these transitions only apply while .forming is on, so dragging stays instant
+   and scrolling between weeks snaps rather than animates. */
+.timeline.forming .tl-track::before { transition: transform .7s cubic-bezier(.5,0,.2,1), opacity .4s ease; }
+.timeline.forming .tl-handle,
+.timeline.forming .tl-fill,
+.timeline.forming .tl-tick { transition: left .7s cubic-bezier(.5,0,.2,1), width .7s cubic-bezier(.5,0,.2,1), opacity .5s ease; }
+.timeline.forming .tl-flag { transition: opacity .5s ease .15s; }
+.timeline.forming .tl-axis { transition: clip-path .7s cubic-bezier(.5,0,.2,1), opacity .45s ease; }
 
-/* empty state: only the record button shows; the timeline is not formed yet */
-.state-empty .tl-track { background: transparent; border-color: transparent; }
-.state-empty .tl-fill, .state-empty .tl-tick { opacity: 0; }
-.state-empty .tl-handle { opacity: 0; pointer-events: none; }
-.state-empty .tl-axis, .state-empty .tl-help { opacity: 0; pointer-events: none; }
-.tl-axis { display: flex; justify-content: space-between; margin-top: 14px; font-size: .68rem; font-weight: 800; color: var(--muted); }
-.tl-help { text-align: center; font-size: .72rem; color: var(--muted); font-weight: 700; margin-top: 9px; }
+/* empty: the timeline is folded into the centre, behind the + button */
+.state-empty .tl-track::before { transform: scaleX(0); opacity: 0; }
+.state-empty .tl-fill { left: 50% !important; width: 0 !important; }
+.state-empty .tl-tick { left: 50% !important; opacity: 0; }
+.state-empty .tl-handle { left: 50% !important; opacity: 0; pointer-events: none; }
+.state-empty .tl-flag { opacity: 0; }
+.state-empty .tl-axis { clip-path: inset(0 50% 0 50%); opacity: 0; }
+.tl-axis { display: flex; justify-content: space-between; margin-top: 14px; font-size: .68rem; font-weight: 800; color: var(--muted); clip-path: inset(0 -3% 0 -3%); transition: opacity .3s ease; }
 
 @media (max-width: 420px) {
   .timeline { padding: 58px 16px 0; }
@@ -248,9 +259,9 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
 .btn.small { padding: 8px 14px; font-size: .84rem; }
 
 /* recorded state: the timeline stays, but reads as a record, not a control */
-.recorded .tl-track { background: transparent; border-color: transparent; pointer-events: none; }
+.recorded .tl-track { pointer-events: none; }
+.recorded .tl-track::before { opacity: 0; }
 .recorded .tl-handle { cursor: default; box-shadow: 0 2px 5px rgba(43,51,61,.16); }
-.recorded .tl-help,
 .recorded .tl-axis { opacity: 0; pointer-events: none; }
 .recorded-verdict { text-align: center; font-size: 1.05rem; font-weight: 800; margin-top: 18px; }
 .recorded-notes { text-align: center; color: var(--ink-soft); font-weight: 600; margin-top: 4px; font-style: italic; }

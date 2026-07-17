@@ -261,35 +261,17 @@
 
   function prefersReduced() { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
 
-  // tap the record button on an empty week → the button stays put (morphs + → ✓)
-  // while the two handles slide out from behind it and the line grows.
+  // tap the record button on an empty week → the whole timeline (lane, ticks,
+  // handles, fill, axis labels) unfolds outward from the centre button, which
+  // stays put and morphs + → ✓.
   function armAndForm() {
     state.armed = true; state.heroMode = "auto"; $("notes").value = "";
-    renderHeroBody();          // fab morphs to ✓ in place; timeline becomes visible
-    if (!prefersReduced()) splitHandles();
-  }
-  function splitHandles() {
-    var s = $("tlStart"), e = $("tlEnd"), f = $("tlFill");
-    var sf = s.querySelector(".tl-flag"), ef = e.querySelector(".tl-flag");
-    // handles start stacked at the centre, hidden behind the button; fill zero.
-    // the time labels start faded out so they don't overlap while stacked.
-    s.style.transition = "none"; e.style.transition = "none"; f.style.transition = "none";
-    sf.style.transition = "none"; ef.style.transition = "none";
-    s.style.left = "50%"; e.style.left = "50%"; s.style.opacity = "1"; e.style.opacity = "1";
-    f.style.left = "50%"; f.style.width = "0%"; f.style.opacity = "1";
-    sf.style.opacity = "0"; ef.style.opacity = "0";
-    void $("tlTrack").offsetWidth; // reflow so this is the animation's first frame
-    var ease = "left .7s cubic-bezier(.5,0,.2,1)"; // smooth ease-in-out, no abrupt jump
-    s.style.transition = ease; e.style.transition = ease;
-    f.style.transition = "left .7s cubic-bezier(.5,0,.2,1), width .7s cubic-bezier(.5,0,.2,1)";
-    sf.style.transition = "opacity .45s ease .2s"; ef.style.transition = "opacity .45s ease .2s";
-    renderTimeline();  // real positions → the two circles slide out from the sides
-    sf.style.opacity = "1"; ef.style.opacity = "1";
-    setTimeout(function () {
-      s.style.transition = ""; e.style.transition = ""; f.style.transition = "";
-      s.style.opacity = ""; e.style.opacity = ""; f.style.opacity = "";
-      sf.style.transition = ""; ef.style.transition = ""; sf.style.opacity = ""; ef.style.opacity = "";
-    }, 800);
+    if (prefersReduced()) { renderHeroBody(); return; }
+    var tl = document.querySelector(".timeline");
+    tl.classList.add("forming");     // enable the unfold transitions
+    void tl.offsetWidth;             // make sure they're live before the state flips
+    renderHeroBody();                // drops .state-empty → everything animates out from centre
+    setTimeout(function () { tl.classList.remove("forming"); }, 840);
   }
   function saveHero() {
     var existing = recordFor(state.selected);
