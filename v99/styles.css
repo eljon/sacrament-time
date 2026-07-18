@@ -163,6 +163,9 @@ main { padding-top: 16px; padding-bottom: 40px; display: grid; gap: 14px; }
    calendar-appropriate rounded face at a comfortable weight (not black) */
 .cal-day {
   flex: 1; display: grid; place-items: center; text-align: center; line-height: 1;
+  /* the status bar is pinned to the bottom; reserve its space so the number
+     centres in the visible gap between the month header and the bar, not lower */
+  padding-bottom: 11px;
   font-family: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, sans-serif;
   font-size: 1.86rem; font-weight: 700; letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
