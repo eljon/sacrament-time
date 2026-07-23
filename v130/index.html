@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sacrament Time Tracker</title>
+  <meta name="description" content="Did sacrament meeting start at 1:30 and end at 2:30? Track streaks, success rate, and goal progress." />
+  <link rel="preconnect" href="https://script.google.com" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏱️</text></svg>" />
+</head>
+<body>
+  <button id="settingsBtn" class="icon-btn" type="button" title="Settings" aria-label="Settings">⚙</button>
+  <span id="appVersion" class="app-version" aria-label="App version"></span>
+
+  <header class="site-header wrap">
+    <span class="eyebrow">SACRAMENT MEETING</span>
+    <h1>Time Tracker</h1>
+    <p class="tagline">start by <b>1:30</b> &middot; end by <b>2:30</b></p>
+  </header>
+
+  <div id="banner" class="banner wrap" hidden></div>
+
+  <main class="wrap">
+    <!-- HERO: this week's entry -->
+    <section class="card hero" aria-label="Log this week">
+      <!-- the meeting timeline is always shown; a "recorded" class flips it
+           from an editable slider to a read-only record display -->
+      <form id="heroInput" class="state-empty" novalidate>
+        <div class="timeline">
+          <div class="tl-track" id="tlTrack">
+            <div class="tl-duration" id="tlDuration"></div>
+            <span class="tl-tick t1"></span>
+            <span class="tl-tick t2"></span>
+            <div class="tl-fill" id="tlFill"></div>
+            <button type="button" class="tl-handle" id="tlStart" role="slider" tabindex="0"
+                    aria-label="Meeting start time" aria-valuetext="">
+              <span class="tl-flag"><span class="tl-cap">START</span><span class="tl-time" id="startValue">—</span></span>
+              <span class="tl-clock"><span class="tl-hand hour"></span><span class="tl-hand minute"></span><span class="tl-hub"></span></span>
+            </button>
+            <button type="button" class="tl-handle" id="tlEnd" role="slider" tabindex="0"
+                    aria-label="Meeting end time" aria-valuetext="">
+              <span class="tl-flag"><span class="tl-cap">END</span><span class="tl-time" id="endValue">—</span></span>
+              <span class="tl-clock"><span class="tl-hand hour"></span><span class="tl-hand minute"></span><span class="tl-hub"></span></span>
+            </button>
+          </div>
+          <div class="tl-axis">
+            <span>1:00</span><span>1:30</span><span>2:00</span><span>2:30</span><span>3:00</span>
+          </div>
+        </div>
+
+        <input type="hidden" id="start" />
+        <input type="hidden" id="end" />
+        <input type="hidden" id="notes" />
+
+        <div class="hero-controls">
+          <!-- recorded view: the verdict comment + edit pencil, sitting on the very
+               same line the ✓ was on, so the ✓ just slides sideways into the pencil -->
+          <div class="recorded-head" id="recHead" hidden>
+            <p class="recorded-verdict" id="recVerdict"></p>
+            <button type="button" class="rec-edit" id="recEditBtn" aria-label="Edit this week">✎</button>
+          </div>
+          <!-- the + starts up on the timeline; on tap it drops here and the two
+               satellites (cancel · notes) slide out from it. On save the ✓ turns
+               back into the spinning clock, then slides sideways into the verdict. -->
+          <div class="tl-cluster">
+            <button type="button" class="tl-ctl del" id="delBtn" aria-label="Delete this week">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 20 7"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12"/><line x1="10" y1="11" x2="10" y2="16"/><line x1="14" y1="11" x2="14" y2="16"/></svg>
+            </button>
+            <button type="button" class="tl-ctl x" id="cancelBtn" aria-label="Cancel">✕</button>
+            <button type="button" class="tl-fab" id="recordFab" aria-label="Record this week">
+              <span class="fab-glyph" id="fabGlyph"></span>
+              <span class="fab-cp" aria-hidden="true"><i class="fab-arm hour"></i><i class="fab-arm minute"></i></span>
+            </button>
+            <button type="button" class="tl-ctl notes" id="notesBtn" aria-label="Add a note">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="recorded-notes" id="recNotes" hidden></p>
+      </form>
+
+      <!-- the Sunday picker sits at the bottom so a scrolling finger never
+           covers the timeline above it -->
+      <div class="week-nav">
+        <div class="coverflow" id="coverflow">
+          <div class="cf-track" id="cfTrack"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="stats" aria-label="Statistics">
+      <div class="stat-card">
+        <div class="stat-value" id="statStreak">0</div>
+        <div class="stat-label">Current streak</div>
+        <div class="stat-sub" id="statStreakSub">weeks on time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statLongest">0</div>
+        <div class="stat-label">Longest streak</div>
+        <div class="stat-sub">personal best</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statRate">—</div>
+        <div class="stat-label">Success rate</div>
+        <div class="stat-sub" id="statRateSub">start &amp; end on time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statWeeks">0</div>
+        <div class="stat-label">Weeks tracked</div>
+        <div class="stat-sub" id="statSince">—</div>
+      </div>
+    </section>
+
+    <!-- GOAL -->
+    <section class="card goal-card" aria-label="Goal">
+      <div class="goal-top">
+        <div class="ring" id="goalRing"><div class="ring-hole"><b id="ringPct">0%</b></div></div>
+        <div class="goal-body">
+          <div class="goal-head">
+            <h2>Goal</h2>
+            <span class="goal-target" id="goalTarget"></span>
+          </div>
+          <p class="goal-msg" id="goalMsg">Log your first week to get started.</p>
+        </div>
+      </div>
+      <div class="insight-grid" id="insightGrid" hidden>
+        <div class="insight"><span class="insight-label">Typical start</span><span class="insight-value" id="insStart">—</span></div>
+        <div class="insight"><span class="insight-label">Typical end</span><span class="insight-value" id="insEnd">—</span></div>
+        <div class="insight"><span class="insight-label">Late to start</span><span class="insight-value" id="insStartLate">—</span></div>
+        <div class="insight"><span class="insight-label">Late to end</span><span class="insight-value" id="insEndLate">—</span></div>
+      </div>
+    </section>
+
+    <!-- HISTORY GRAPH: each week's meeting as a bar spanning its start→end time -->
+    <section class="card history-graph" id="historyGraph" aria-label="Weekly history" hidden>
+      <div class="section-head"><h2>History</h2><span class="hg-hint">start &amp; end each week</span></div>
+      <div class="hg-chart">
+        <div class="hg-yaxis" id="hgYaxis"></div>
+        <div class="hg-main">
+          <div class="hg-plot" id="hgPlot"></div>
+          <div class="hg-xrow" id="hgXrow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECENT STRIP (hidden for now) -->
+    <section class="card" aria-label="Recent weeks" id="stripCard" hidden style="display:none">
+      <div class="section-head"><h2>Last weeks</h2></div>
+      <div class="strip" id="strip"></div>
+      <div class="legend">
+        <span><i class="dot ok"></i> On time</span>
+        <span><i class="dot partial"></i> Partly late</span>
+        <span><i class="dot late"></i> Late</span>
+      </div>
+    </section>
+
+    <!-- ALL WEEKS (detailed log) -->
+    <section class="card" aria-label="All weeks">
+      <div class="section-head">
+        <h2>All weeks</h2>
+        <button type="button" class="btn ghost small" id="refreshBtn">Refresh</button>
+      </div>
+      <div id="history"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer wrap" hidden></footer>
+
+  <!-- Settings dialog -->
+  <dialog id="settingsDialog" class="dialog">
+    <form method="dialog" class="dialog-inner">
+      <h2>Settings</h2>
+      <p class="muted small">Paste the Web App URL from your Google Apps Script deployment. Leave blank to store data only in this browser.</p>
+      <div class="field">
+        <label for="cfgUrl">Apps Script Web App URL</label>
+        <input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/…/exec" />
+      </div>
+      <div class="field">
+        <label for="cfgToken">Shared token <span class="muted">(optional)</span></label>
+        <input type="text" id="cfgToken" placeholder="only if you set one in Code.gs" />
+      </div>
+      <div class="field">
+        <label for="cfgGoal">Goal streak (weeks)</label>
+        <input type="number" id="cfgGoal" min="1" max="52" step="1" />
+      </div>
+      <div id="cfgStatus" class="cfg-status" aria-live="polite"></div>
+      <div class="form-actions">
+        <button type="button" class="btn ghost small" id="cfgTestBtn">Test connection</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="cfgCancelBtn">Close</button>
+        <button type="button" class="btn primary" id="cfgSaveBtn">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Notes dialog -->
+  <dialog id="notesDialog" class="dialog">
+    <form method="dialog" class="dialog-inner">
+      <h2>Note</h2>
+      <p class="muted small">A short note for this week (optional).</p>
+      <textarea id="notesText" class="notes-area" rows="3" maxlength="140" placeholder="e.g. long testimony meeting"></textarea>
+      <div class="form-actions">
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="notesCancelBtn">Cancel</button>
+        <button type="button" class="btn primary" id="notesSaveBtn">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
